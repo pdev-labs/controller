@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>PSP Controller</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="controller-container">
+        <!-- Top Triggers -->
+        <div class="triggers">
+            <button id="btn-l" class="trigger-btn l-btn" data-btn="btn-l">L</button>
+            <div class="status-indicator">
+                <div id="connection-status" class="status-dot disconnected"></div>
+                <span>PPSSPP Controller</span>
+            </div>
+            <button id="btn-r" class="trigger-btn r-btn" data-btn="btn-r">R</button>
+        </div>
+
+        <!-- Middle Section (D-Pad and Action Buttons) -->
+        <div class="middle-section">
+            <!-- Left Side: D-Pad and Analog -->
+            <div class="left-controls">
+                <div class="dpad">
+                    <button class="dpad-btn up" data-btn="dpad-up"></button>
+                    <button class="dpad-btn right" data-btn="dpad-right"></button>
+                    <button class="dpad-btn down" data-btn="dpad-down"></button>
+                    <button class="dpad-btn left" data-btn="dpad-left"></button>
+                    <div class="dpad-center"></div>
+                </div>
+                
+                <div class="analog-stick-container" id="analog-container">
+                    <div class="analog-stick" id="analog-stick"></div>
+                </div>
+            </div>
+
+            <!-- Right Side: Action Buttons -->
+            <div class="right-controls">
+                <div class="action-buttons">
+                    <button class="action-btn triangle" data-btn="btn-triangle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3L22 21H2L12 3Z"/></svg>
+                    </button>
+                    <button class="action-btn circle" data-btn="btn-circle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+                    </button>
+                    <button class="action-btn cross" data-btn="btn-cross">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6L18 18"/></svg>
+                    </button>
+                    <button class="action-btn square" data-btn="btn-square">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18"/></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Section: Start / Select -->
+        <div class="bottom-section">
+            <div class="sys-buttons">
+                <button class="sys-btn" data-btn="btn-select">SELECT</button>
+                <button class="sys-btn" data-btn="btn-start">START</button>
+            </div>
+        </div>
+        
+        <!-- Fullscreen overlay for connecting -->
+        <div id="overlay" class="overlay">
+            <button id="connect-btn" class="connect-btn">Connect & Fullscreen</button>
+        </div>
+    </div>
+
+    <script src="controller.js"></script>
+</body>
+</html>

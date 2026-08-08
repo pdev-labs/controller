@@ -1,0 +1,23 @@
+{
+  "name": "psp-controller",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "type": "commonjs",
+  "dependencies": {
+    "cordova": "^13.0.0",
+    "express": "^5.2.1",
+    "robotjs": "^0.9.1",
+    "uinput": "^1.1.1",
+    "ws": "^8.21.3"
+  },
+  "allowScripts": {
+    "uinput@1.1.1": true,
+    "ioctl@1.0.1": true,
+    "ref@1.3.5": true
+  }
+}
