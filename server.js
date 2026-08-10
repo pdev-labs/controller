@@ -1,5 +1,6 @@
 const express = require('express');
 const https = require('https');
+const http = require('http');
 const fs = require('fs');
 const WebSocket = require('ws');
 const { spawn } = require('child_process');
@@ -19,7 +20,9 @@ app.use(express.static(path.join(__dirname, 'public'), {
     }
 }));
 
-const server = https.createServer({
+const httpServer = http.createServer(app);
+
+const httpsServer = https.createServer({
     key: fs.readFileSync(path.join(__dirname, 'server.key')),
     cert: fs.readFileSync(path.join(__dirname, 'server.cert'))
 }, app);
@@ -29,8 +32,8 @@ app.get('/ping', (req, res) => {
     res.send('psp-controller');
 });
 
-const wss = new WebSocket.Server({ server });
-
+const wssHttp = new WebSocket.Server({ server: httpServer });
+const wssHttps = new WebSocket.Server({ server: httpsServer });
 
 // Spawn the Python virtual joystick script
 let joystickProc = null;
@@ -69,7 +72,7 @@ const buttonMap = {
     // actually, in controller.js DPAD buttons use these names, so we'll handle them specially.
 };
 
-wss.on('connection', (ws) => {
+const handleWsConnection = (ws) => {
     console.log('Controller connected!');
 
     ws.on('message', (message) => {
@@ -152,10 +155,19 @@ wss.on('connection', (ws) => {
     ws.on('close', () => {
         console.log('Controller disconnected.');
     });
-});
+};
+
+wssHttp.on('connection', handleWsConnection);
+wssHttps.on('connection', handleWsConnection);
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, '0.0.0.0', () => {
+const HTTPS_PORT = PORT + 1;
+
+httpServer.listen(PORT, '0.0.0.0', () => {
+    console.log(`HTTP Server running on port ${PORT}`);
+});
+
+httpsServer.listen(HTTPS_PORT, '0.0.0.0', () => {
     let localIp = '127.0.0.1';
     const interfaces = os.networkInterfaces();
     for (const name of Object.keys(interfaces)) {
@@ -165,12 +177,12 @@ server.listen(PORT, '0.0.0.0', () => {
             }
         }
     }
-    const url = `https://${localIp}:${PORT}`;
+    const url = `https://${localIp}:${HTTPS_PORT}`;
     const highlight = "\x1b[36m\x1b[1m";
     const reset = "\x1b[0m";
     
-    console.log(`PSP Controller Server running at ${highlight}${url}${reset}`);
-    console.log(`Scan the QR code below to connect from your phone:\n`);
+    console.log(`PSP Controller HTTPS Server running at ${highlight}${url}${reset}`);
+    console.log(`Scan the QR code below to connect from your phone browser:\n`);
     qrcode.generate(url, {small: true});
     console.log(`\nNote: Accept the "Your connection is not private" warning since we use a self-signed certificate for Gyro support.`);
     console.log(`Virtual Xbox 360 Controller is ACTIVE!`);

@@ -172,7 +172,7 @@ if (autoDetectBtn) {
             for (let i = 1; i < 255; i++) {
                 const ip = subnet + i;
                 promises.push(
-                    fetch(`https://${ip}:3000/ping`, { signal: AbortSignal.timeout(3000) })
+                    fetch(`http://${ip}:3000/ping`, { signal: AbortSignal.timeout(3000) })
                     .then(r => r.text())
                     .then(t => {
                         if (t === 'psp-controller') return ip;
@@ -215,7 +215,7 @@ if (fullscreenBtn) {
 
 function connectWebSocket() {
     let host = window.location.hostname;
-    let port = window.location.port || '3000';
+    let port = isCapacitor ? '3000' : (window.location.port || '3001');
     
     if (isCapacitor) {
         const savedIp = localStorage.getItem('pc-ip');
@@ -224,13 +224,9 @@ function connectWebSocket() {
         }
     }
     
-    // Fallback if port is missing for some reason
-    if (!port) port = '3000';
-    
-    // If it's a native app, we might need ws:// depending on the server configuration.
-    // If we're serving HTTPS locally, we use wss, else ws. Since we are using an IP on LAN, it's usually ws://.
-    // Let's assume ws:// for direct IP connections if running on Capacitor.
-    const protocol = (isCapacitor || host.match(/^[0-9\.]+$/)) ? 'ws' : 'wss';
+    // If it's a native app, we use ws://
+    // If we're serving HTTPS locally on browser, we use wss
+    const protocol = isCapacitor ? 'ws' : (window.location.protocol === 'https:' ? 'wss' : 'ws');
     ws = new WebSocket(`${protocol}://${host}:${port}`);
 
     ws.onopen = () => {
