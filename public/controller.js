@@ -67,7 +67,35 @@ let ws;
 // Prevent default context menu and multi-touch zooming
 document.addEventListener('contextmenu', event => event.preventDefault());
 
+// Capacitor APK Logic
+let isCapacitor = false;
+try {
+    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+        isCapacitor = true;
+    }
+} catch (e) {}
+
+const apkIpContainer = document.getElementById('apk-ip-container');
+const apkIpInput = document.getElementById('apk-ip-input');
+
+if (isCapacitor && apkIpContainer && apkIpInput) {
+    apkIpContainer.style.display = 'flex';
+    const savedIp = localStorage.getItem('pc-ip');
+    if (savedIp) {
+        apkIpInput.value = savedIp;
+    }
+}
+
 connectBtn.addEventListener('click', () => {
+    if (isCapacitor && apkIpInput) {
+        const ip = apkIpInput.value.trim();
+        if (!ip) {
+            alert('Please enter your PC IP address');
+            return;
+        }
+        localStorage.setItem('pc-ip', ip);
+    }
+    
     // Request Fullscreen
     if (document.documentElement.requestFullscreen) {
         document.documentElement.requestFullscreen().catch(err => console.log(err));
@@ -92,9 +120,24 @@ if (fullscreenBtn) {
 }
 
 function connectWebSocket() {
-    const host = window.location.hostname;
-    const port = window.location.port;
-    ws = new WebSocket(`wss://${host}:${port}`);
+    let host = window.location.hostname;
+    let port = window.location.port || '3000';
+    
+    if (isCapacitor) {
+        const savedIp = localStorage.getItem('pc-ip');
+        if (savedIp) {
+            host = savedIp;
+        }
+    }
+    
+    // Fallback if port is missing for some reason
+    if (!port) port = '3000';
+    
+    // If it's a native app, we might need ws:// depending on the server configuration.
+    // If we're serving HTTPS locally, we use wss, else ws. Since we are using an IP on LAN, it's usually ws://.
+    // Let's assume ws:// for direct IP connections if running on Capacitor.
+    const protocol = (isCapacitor || host.match(/^[0-9\.]+$/)) ? 'ws' : 'wss';
+    ws = new WebSocket(`${protocol}://${host}:${port}`);
 
     ws.onopen = () => {
         statusDot.classList.remove('disconnected');

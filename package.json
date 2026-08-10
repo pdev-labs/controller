@@ -12,6 +12,7 @@
   "keywords": [],
   "type": "commonjs",
   "dependencies": {
+    "@capacitor/core": "^8.5.0",
     "cordova": "^13.0.0",
     "express": "^5.2.1",
     "qrcode": "^1.5.4",
@@ -19,6 +20,8 @@
     "ws": "^8.21.3"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/cli": "^8.5.0",
     "electron": "^43.3.0",
     "electron-builder": "^24.13.3"
   },
