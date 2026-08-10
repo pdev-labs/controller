@@ -71,7 +71,7 @@ function startServer(win) {
 
     win.webContents.on('did-finish-load', async () => {
         const ip = getLocalIp();
-        const url = `https://${ip}:3000`;
+        const url = `https://${ip}:3001`;
         try {
             const qrDataUrl = await QRCode.toDataURL(url, { 
                 width: 250,

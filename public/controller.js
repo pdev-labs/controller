@@ -70,10 +70,12 @@ document.addEventListener('contextmenu', event => event.preventDefault());
 // Capacitor APK Logic
 let isCapacitor = false;
 try {
-    if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+    if (typeof window !== 'undefined' && window.Capacitor) {
         isCapacitor = true;
     }
-} catch (e) {}
+} catch (e) {
+    console.error(e);
+}
 
 const apkIpContainer = document.getElementById('apk-ip-container');
 const apkIpInput = document.getElementById('apk-ip-input');
