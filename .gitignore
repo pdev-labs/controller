@@ -3,6 +3,7 @@ venv/
 __pycache__/
 *.zip
 *.jar
+!android/gradle/wrapper/gradle-wrapper.jar
 *.apk
 *.log
 .DS_Store
