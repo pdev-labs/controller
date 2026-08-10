@@ -22,6 +22,9 @@
     "electron": "^43.3.0",
     "electron-builder": "^26.15.3"
   },
+  "overrides": {
+    "@noble/hashes": "1.3.3"
+  },
   "build": {
     "appId": "com.psp.controller",
     "linux": {
