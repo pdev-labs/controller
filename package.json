@@ -35,8 +35,7 @@
       "target": ["dmg"]
     },
     "asarUnpack": [
-      "dist/virtual_joystick",
-      "dist/virtual_joystick.exe"
+      "dist/virtual_joystick*"
     ],
     "files": [
       "**/*",

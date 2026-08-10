@@ -59,7 +59,8 @@ jobs:
     - name: Install PyInstaller and dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pyinstaller evdev || echo "Ignoring evdev failure on non-Linux"
+        pip install pyinstaller
+        pip install evdev || echo "Ignoring evdev failure on non-Linux"
 
     - name: Build Python Joystick Engine
       run: |
