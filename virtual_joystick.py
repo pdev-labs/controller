@@ -1,7 +1,21 @@
 import sys
 import json
 import time
-from evdev import UInput, ecodes as e, AbsInfo
+
+try:
+    from evdev import UInput, ecodes as e, AbsInfo
+    HAS_EVDEV = True
+except ImportError:
+    HAS_EVDEV = False
+    print("Warning: evdev not available (probably not Linux). Controller emulation disabled.", file=sys.stderr)
+    class Dummy:
+        def __getattr__(self, name): return 0
+        def write(self, *args): pass
+        def syn(self, *args): pass
+        def close(self): pass
+    e = Dummy()
+    UInput = lambda *args, **kwargs: Dummy()
+    AbsInfo = lambda *args, **kwargs: None
 
 capabilities = {
     e.EV_KEY: [

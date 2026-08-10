@@ -30,7 +30,11 @@ const wss = new WebSocket.Server({ server });
 let joystickProc = null;
 try {
     const baseDir = __dirname.replace('app.asar', 'app.asar.unpacked');
-    const binaryPath = path.join(baseDir, 'dist', 'virtual_joystick');
+    let binaryName = 'virtual_joystick';
+    if (os.platform() === 'win32') {
+        binaryName += '.exe';
+    }
+    const binaryPath = path.join(baseDir, 'dist', binaryName);
     joystickProc = spawn(binaryPath, []);
     
     joystickProc.stderr.on('data', (data) => {

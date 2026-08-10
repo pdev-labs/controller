@@ -25,11 +25,18 @@
   "build": {
     "appId": "com.psp.controller",
     "linux": {
-      "target": "AppImage",
+      "target": ["AppImage"],
       "category": "Utility"
     },
+    "win": {
+      "target": ["nsis"]
+    },
+    "mac": {
+      "target": ["dmg"]
+    },
     "asarUnpack": [
-      "dist/virtual_joystick"
+      "dist/virtual_joystick",
+      "dist/virtual_joystick.exe"
     ],
     "files": [
       "**/*",
