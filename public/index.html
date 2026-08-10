@@ -137,9 +137,17 @@
                     <button id="sel-gamepad" class="sys-btn md-btn active" style="padding: 10px 20px;">🎮 Gamepad<span class="md-ripple"></span></button>
                     <button id="sel-trackpad" class="sys-btn md-btn" style="padding: 10px 20px;">🖱️ Trackpad<span class="md-ripple"></span></button>
                 </div>
-                <div id="apk-ip-container" style="display: none; flex-direction: column; align-items: center; margin-bottom: 20px;">
+                <div id="apk-ip-container" style="display: none; flex-direction: column; align-items: center; margin-bottom: 20px; width: 100%;">
                     <p style="color: var(--md-secondary); font-size: 12px; margin-bottom: 8px;">Enter PC IP Address:</p>
-                    <input type="text" id="apk-ip-input" placeholder="e.g. 192.168.1.5" style="padding: 10px; border-radius: 8px; border: 1px solid var(--md-outline); background: var(--md-surface); color: var(--md-on-surface); text-align: center; font-size: 16px; width: 200px;">
+                    <input type="text" id="apk-ip-input" placeholder="e.g. 192.168.1.5" style="padding: 10px; border-radius: 8px; border: 1px solid var(--md-outline); background: var(--md-surface); color: var(--md-on-surface); text-align: center; font-size: 16px; width: 200px; margin-bottom: 15px;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+                        <button id="scan-qr-btn" class="sys-btn md-btn md-outlined" style="padding: 8px 15px;">📷 Scan QR</button>
+                        <button id="auto-detect-btn" class="sys-btn md-btn md-outlined" style="padding: 8px 15px;">🔍 Auto-Detect</button>
+                    </div>
+                </div>
+                <div id="qr-reader-container" style="display: none; flex-direction: column; align-items: center; margin-bottom: 20px; width: 100%;">
+                    <div id="qr-reader" style="width: 250px; border-radius: 8px; overflow: hidden; background: #000;"></div>
+                    <button id="cancel-qr-btn" class="sys-btn md-btn md-outlined" style="margin-top: 10px; padding: 8px 15px;">Cancel Scan</button>
                 </div>
                 <button id="connect-btn" class="connect-btn md-btn md-filled">Connect & Fullscreen<span class="md-ripple"></span></button>
                 <button id="edit-layout-btn" class="edit-layout-btn md-btn md-outlined">Customize Layout<span class="md-ripple"></span></button>
@@ -167,6 +175,7 @@
         </div>
     </div>
 
-    <script src="controller.js?v=3"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="controller.js?v=4"></script>
 </body>
 </html>

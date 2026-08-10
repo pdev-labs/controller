@@ -104,6 +104,100 @@ connectBtn.addEventListener('click', () => {
     connectWebSocket();
 });
 
+// QR Code Scanner Logic
+const scanQrBtn = document.getElementById('scan-qr-btn');
+const cancelQrBtn = document.getElementById('cancel-qr-btn');
+const qrReaderContainer = document.getElementById('qr-reader-container');
+let html5QrcodeScanner = null;
+
+if (scanQrBtn) {
+    scanQrBtn.addEventListener('click', () => {
+        apkIpContainer.style.display = 'none';
+        qrReaderContainer.style.display = 'flex';
+        
+        if (!html5QrcodeScanner) {
+            html5QrcodeScanner = new Html5Qrcode("qr-reader");
+        }
+        
+        html5QrcodeScanner.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 250 } },
+            (decodedText, decodedResult) => {
+                // QR code usually has format: https://192.168.1.5:3000
+                html5QrcodeScanner.stop();
+                qrReaderContainer.style.display = 'none';
+                apkIpContainer.style.display = 'flex';
+                
+                try {
+                    const url = new URL(decodedText);
+                    apkIpInput.value = url.hostname;
+                    connectBtn.click();
+                } catch(e) {
+                    apkIpInput.value = decodedText;
+                }
+            },
+            (errorMessage) => {
+                // parse error, ignore
+            }
+        ).catch((err) => {
+            alert("Camera error: " + err);
+            qrReaderContainer.style.display = 'none';
+            apkIpContainer.style.display = 'flex';
+        });
+    });
+}
+
+if (cancelQrBtn) {
+    cancelQrBtn.addEventListener('click', () => {
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.stop().catch(e => console.log(e));
+        }
+        qrReaderContainer.style.display = 'none';
+        apkIpContainer.style.display = 'flex';
+    });
+}
+
+// Auto-Detect Logic
+const autoDetectBtn = document.getElementById('auto-detect-btn');
+if (autoDetectBtn) {
+    autoDetectBtn.addEventListener('click', async () => {
+        autoDetectBtn.innerText = '🔍 Scanning...';
+        autoDetectBtn.disabled = true;
+        
+        // Scan common local subnets concurrently
+        const subnets = ['192.168.1.', '192.168.0.', '192.168.29.', '10.0.0.'];
+        const promises = [];
+        
+        for (const subnet of subnets) {
+            for (let i = 1; i < 255; i++) {
+                const ip = subnet + i;
+                promises.push(
+                    fetch(`https://${ip}:3000/ping`, { signal: AbortSignal.timeout(3000) })
+                    .then(r => r.text())
+                    .then(t => {
+                        if (t === 'psp-controller') return ip;
+                        throw new Error('Not PC');
+                    })
+                );
+            }
+        }
+        
+        try {
+            const result = await Promise.any(promises);
+            apkIpInput.value = result;
+            autoDetectBtn.innerText = '✅ Found PC!';
+            setTimeout(() => { connectBtn.click(); }, 500);
+        } catch(e) {
+            autoDetectBtn.innerText = '❌ Not Found';
+        }
+        
+        setTimeout(() => { 
+            autoDetectBtn.innerText = '🔍 Auto-Detect'; 
+            autoDetectBtn.disabled = false; 
+        }, 3000);
+    });
+}
+
 const fullscreenBtn = document.getElementById('fullscreen-btn');
 if (fullscreenBtn) {
     fullscreenBtn.addEventListener('click', () => {

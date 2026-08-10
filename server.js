@@ -23,6 +23,12 @@ const server = https.createServer({
     key: fs.readFileSync(path.join(__dirname, 'server.key')),
     cert: fs.readFileSync(path.join(__dirname, 'server.cert'))
 }, app);
+
+app.get('/ping', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.send('psp-controller');
+});
+
 const wss = new WebSocket.Server({ server });
 
 
