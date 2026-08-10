@@ -1,3 +1,46 @@
+
+// --- HAPTICS & 2X BUTTON ---
+let isVibrationEnabled = true;
+const vibToggle = document.getElementById('vibration-toggle');
+if (vibToggle) {
+    vibToggle.addEventListener('change', (e) => {
+        isVibrationEnabled = (e.target.value === 'on');
+    });
+}
+
+function triggerVibration() {
+    if (isVibrationEnabled && navigator.vibrate) {
+        navigator.vibrate(40); // 40ms buzz
+    }
+}
+
+const btn2x = document.getElementById('btn-2x');
+if (btn2x) {
+    btn2x.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        btn2x.classList.add('active');
+        triggerVibration();
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'key', code: 'KEY_TAB', val: 1 }));
+        }
+    });
+    
+    btn2x.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        btn2x.classList.remove('active');
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'key', code: 'KEY_TAB', val: 0 }));
+        }
+    });
+    
+    btn2x.addEventListener('touchcancel', (e) => {
+        btn2x.classList.remove('active');
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(JSON.stringify({ type: 'key', code: 'KEY_TAB', val: 0 }));
+        }
+    });
+}
+// ----------------------------
 const overlay = document.getElementById('overlay');
 const connectBtn = document.getElementById('connect-btn');
 const statusDot = document.getElementById('connection-status');
@@ -33,6 +76,21 @@ connectBtn.addEventListener('click', () => {
     connectWebSocket();
 });
 
+const fullscreenBtn = document.getElementById('fullscreen-btn');
+if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', () => {
+        if (!document.fullscreenElement) {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            }
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(err => console.log(err));
+            }
+        }
+    });
+}
+
 function connectWebSocket() {
     const host = window.location.hostname;
     const port = window.location.port;
@@ -60,6 +118,9 @@ function connectWebSocket() {
 
 function sendInput(buttonId, status) {
     if (isEditMode) return; // Disable inputs while editing
+    if (status === 'pressed') {
+        triggerVibration();
+    }
     if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({
             type: 'button',
@@ -217,7 +278,7 @@ function moveStick(clientX, clientY) {
 const gyroBtn = document.getElementById('gyro-btn');
 let isGyroActive = false;
 let gyroCenter = null;
-const maxTilt = 30; // 30 degrees tilt for max axis
+let maxTilt = 30; // 30 degrees tilt for max axis
 
 if (gyroBtn) {
     gyroBtn.addEventListener('click', async () => {
@@ -238,6 +299,13 @@ if (gyroBtn) {
             gyroBtn.innerHTML = 'GYRO ON<span class="md-ripple"></span>';
             gyroBtn.classList.add('active');
             gyroCenter = null; // Calibrate on next frame
+            
+            setTimeout(() => {
+                if (gyroCenter === null) {
+                    alert("ERROR: No Gyroscope data received!\n\n1. Check if your phone has a gyro.\n2. If using Chrome on Android, you may need to enable sensors in Site Settings.");
+                }
+            }, 2000);
+            
             window.addEventListener('deviceorientation', handleGyro);
         } else {
             isGyroActive = false;
@@ -579,19 +647,20 @@ closeKeyboardBtn.addEventListener('click', () => {
 const vkLayout = [
     // Row 1
     [
-        {label: 'Esc', code: 'KEY_ESC', cls: 'special'},
-        {label: 'F1', code: 'KEY_F1'}, {label: 'F2', code: 'KEY_F2'}, {label: 'F3', code: 'KEY_F3'}, {label: 'F4', code: 'KEY_F4'},
-        {label: 'F5', code: 'KEY_F5'}, {label: 'F6', code: 'KEY_F6'}, {label: 'F7', code: 'KEY_F7'}, {label: 'F8', code: 'KEY_F8'},
-        {label: 'F9', code: 'KEY_F9'}, {label: 'F10', code: 'KEY_F10'}, {label: 'F11', code: 'KEY_F11'}, {label: 'F12', code: 'KEY_F12'},
-        {label: 'PrtSc', code: 'KEY_SYSRQ', cls: 'special'}, {label: 'ScrLk', code: 'KEY_SCROLLLOCK', cls: 'special'}, {label: 'Pause', code: 'KEY_PAUSE', cls: 'special'}
+        {label: 'Esc', code: 'KEY_ESC', cls: 'accent'}, {cls: 'vk-gap'},
+        {label: 'F1', code: 'KEY_F1'}, {label: 'F2', code: 'KEY_F2'}, {label: 'F3', code: 'KEY_F3'}, {label: 'F4', code: 'KEY_F4'}, {cls: 'vk-gap-small'},
+        {label: 'F5', code: 'KEY_F5'}, {label: 'F6', code: 'KEY_F6'}, {label: 'F7', code: 'KEY_F7'}, {label: 'F8', code: 'KEY_F8'}, {cls: 'vk-gap-small'},
+        {label: 'F9', code: 'KEY_F9'}, {label: 'F10', code: 'KEY_F10'}, {label: 'F11', code: 'KEY_F11'}, {label: 'F12', code: 'KEY_F12'}, {cls: 'vk-gap-small'},
+        {label: 'PrtSc', code: 'KEY_SYSRQ', cls: 'special'}, {label: 'ScrLk', code: 'KEY_SCROLLLOCK', cls: 'special'}, {label: 'Pause', code: 'KEY_PAUSE', cls: 'special'}, {cls: 'vk-gap-small'},
+        {cls: 'vk-gap-small'}
     ],
     // Row 2
     [
         {label: '~', code: 'KEY_GRAVE'}, {label: '1', code: 'KEY_1'}, {label: '2', code: 'KEY_2'}, {label: '3', code: 'KEY_3'},
         {label: '4', code: 'KEY_4'}, {label: '5', code: 'KEY_5'}, {label: '6', code: 'KEY_6'}, {label: '7', code: 'KEY_7'},
         {label: '8', code: 'KEY_8'}, {label: '9', code: 'KEY_9'}, {label: '0', code: 'KEY_0'}, {label: '-', code: 'KEY_MINUS'},
-        {label: '=', code: 'KEY_EQUAL'}, {label: 'Backspace', code: 'KEY_BACKSPACE', cls: 'special wider'},
-        {label: 'Ins', code: 'KEY_INSERT', cls: 'special'}, {label: 'Home', code: 'KEY_HOME', cls: 'special'}, {label: 'PgUp', code: 'KEY_PAGEUP', cls: 'special'},
+        {label: '=', code: 'KEY_EQUAL'}, {label: 'Backspace', code: 'KEY_BACKSPACE', cls: 'special wider'}, {cls: 'vk-gap-small'},
+        {label: 'Ins', code: 'KEY_INSERT', cls: 'special'}, {label: 'Home', code: 'KEY_HOME', cls: 'special'}, {label: 'PgUp', code: 'KEY_PAGEUP', cls: 'special'}, {cls: 'vk-gap-small'},
         {label: 'Num', code: 'KEY_NUMLOCK', cls: 'special'}, {label: '/', code: 'KEY_KPSLASH', cls: 'special'}, {label: '*', code: 'KEY_KPASTERISK', cls: 'special'}, {label: '-', code: 'KEY_KPMINUS', cls: 'special'}
     ],
     // Row 3
@@ -600,8 +669,8 @@ const vkLayout = [
         {label: 'Q', code: 'KEY_Q'}, {label: 'W', code: 'KEY_W'}, {label: 'E', code: 'KEY_E'}, {label: 'R', code: 'KEY_R'},
         {label: 'T', code: 'KEY_T'}, {label: 'Y', code: 'KEY_Y'}, {label: 'U', code: 'KEY_U'}, {label: 'I', code: 'KEY_I'},
         {label: 'O', code: 'KEY_O'}, {label: 'P', code: 'KEY_P'}, {label: '[', code: 'KEY_LEFTBRACE'}, {label: ']', code: 'KEY_RIGHTBRACE'},
-        {label: '\\', code: 'KEY_BACKSLASH', cls: 'special wider'},
-        {label: 'Del', code: 'KEY_DELETE', cls: 'special'}, {label: 'End', code: 'KEY_END', cls: 'special'}, {label: 'PgDn', code: 'KEY_PAGEDOWN', cls: 'special'},
+        {label: '\\', code: 'KEY_BACKSLASH', cls: 'special wider'}, {cls: 'vk-gap-small'},
+        {label: 'Del', code: 'KEY_DELETE', cls: 'special'}, {label: 'End', code: 'KEY_END', cls: 'special'}, {label: 'PgDn', code: 'KEY_PAGEDOWN', cls: 'special'}, {cls: 'vk-gap-small'},
         {label: '7', code: 'KEY_KP7'}, {label: '8', code: 'KEY_KP8'}, {label: '9', code: 'KEY_KP9'}, {label: '+', code: 'KEY_KPPLUS', cls: 'special'}
     ],
     // Row 4
@@ -610,18 +679,18 @@ const vkLayout = [
         {label: 'A', code: 'KEY_A'}, {label: 'S', code: 'KEY_S'}, {label: 'D', code: 'KEY_D'}, {label: 'F', code: 'KEY_F'},
         {label: 'G', code: 'KEY_G'}, {label: 'H', code: 'KEY_H'}, {label: 'J', code: 'KEY_J'}, {label: 'K', code: 'KEY_K'},
         {label: 'L', code: 'KEY_L'}, {label: ';', code: 'KEY_SEMICOLON'}, {label: '\'', code: 'KEY_APOSTROPHE'},
-        {label: 'Enter', code: 'KEY_ENTER', cls: 'special wider'},
-        {label: '', code: ''}, {label: '', code: ''}, {label: '', code: ''},
-        {label: '4', code: 'KEY_KP4'}, {label: '5', code: 'KEY_KP5'}, {label: '6', code: 'KEY_KP6'}, {label: 'Ent', code: 'KEY_KPENTER', cls: 'special'}
+        {label: 'Enter', code: 'KEY_ENTER', cls: 'accent wider'}, {cls: 'vk-gap-small'},
+        {cls: 'vk-gap-empty'}, {cls: 'vk-gap-empty'}, {cls: 'vk-gap-empty'}, {cls: 'vk-gap-small'},
+        {label: '4', code: 'KEY_KP4'}, {label: '5', code: 'KEY_KP5'}, {label: '6', code: 'KEY_KP6'}, {label: '', code: '', cls: 'vk-gap-empty'}
     ],
     // Row 5
     [
         {label: 'Shift', code: 'KEY_LEFTSHIFT', cls: 'special wider'},
         {label: 'Z', code: 'KEY_Z'}, {label: 'X', code: 'KEY_X'}, {label: 'C', code: 'KEY_C'}, {label: 'V', code: 'KEY_V'},
         {label: 'B', code: 'KEY_B'}, {label: 'N', code: 'KEY_N'}, {label: 'M', code: 'KEY_M'}, {label: ',', code: 'KEY_COMMA'},
-        {label: '.', code: 'KEY_DOT'}, {label: '/', code: 'KEY_SLASH'}, {label: 'Shift', code: 'KEY_RIGHTSHIFT', cls: 'special wide'},
-        {label: '', code: ''}, {label: 'Up', code: 'KEY_UP', cls: 'special'}, {label: '', code: ''},
-        {label: '1', code: 'KEY_KP1'}, {label: '2', code: 'KEY_KP2'}, {label: '3', code: 'KEY_KP3'}, {label: 'Ent', code: 'KEY_KPENTER', cls: 'special'}
+        {label: '.', code: 'KEY_DOT'}, {label: '/', code: 'KEY_SLASH'}, {label: 'Shift', code: 'KEY_RIGHTSHIFT', cls: 'special wide'}, {cls: 'vk-gap-small'},
+        {cls: 'vk-gap-empty'}, {label: 'Up', code: 'KEY_UP', cls: 'special'}, {cls: 'vk-gap-empty'}, {cls: 'vk-gap-small'},
+        {label: '1', code: 'KEY_KP1'}, {label: '2', code: 'KEY_KP2'}, {label: '3', code: 'KEY_KP3'}, {label: 'Ent', code: 'KEY_KPENTER', cls: 'accent'}
     ],
     // Row 6
     [
@@ -632,11 +701,11 @@ const vkLayout = [
         {label: 'Alt', code: 'KEY_RIGHTALT', cls: 'special'},
         {label: 'Win', code: 'KEY_RIGHTMETA', cls: 'special'},
         {label: 'Menu', code: 'KEY_COMPOSE', cls: 'special'},
-        {label: 'Ctrl', code: 'KEY_RIGHTCTRL', cls: 'special wide'},
+        {label: 'Ctrl', code: 'KEY_RIGHTCTRL', cls: 'special wide'}, {cls: 'vk-gap-small'},
         {label: 'Left', code: 'KEY_LEFT', cls: 'special'},
         {label: 'Down', code: 'KEY_DOWN', cls: 'special'},
-        {label: 'Right', code: 'KEY_RIGHT', cls: 'special'},
-        {label: '0', code: 'KEY_KP0', cls: 'wide'}, {label: '.', code: 'KEY_KPDOT'}, {label: '', code: ''}
+        {label: 'Right', code: 'KEY_RIGHT', cls: 'special'}, {cls: 'vk-gap-small'},
+        {label: '0', code: 'KEY_KP0', cls: 'wide'}, {label: '.', code: 'KEY_KPDOT'}, {label: '', code: '', cls: 'vk-gap-empty'}
     ]
 ];
 
@@ -645,34 +714,66 @@ vkLayout.forEach(row => {
     rowDiv.className = 'vk-row';
     row.forEach(keyData => {
         const keyBtn = document.createElement('div');
-        keyBtn.className = 'vk-key ' + (keyData.cls || '');
-        keyBtn.textContent = keyData.label;
-        
-        const sendKey = (val) => {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-                ws.send(JSON.stringify({ type: 'key', code: keyData.code, val: val }));
-            }
-        };
-
-        keyBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            keyBtn.classList.add('active');
-            sendKey(1);
-        });
-        keyBtn.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            keyBtn.classList.remove('active');
-            sendKey(0);
-        });
-        keyBtn.addEventListener('touchcancel', (e) => {
-            keyBtn.classList.remove('active');
-            sendKey(0);
-        });
-        
+        if (keyData.code === 'gap' || (keyData.cls && keyData.cls.includes('vk-gap'))) {
+            keyBtn.className = keyData.cls || 'vk-gap';
+        } else {
+            keyBtn.className = 'vk-key ' + (keyData.cls || '');
+            keyBtn.textContent = keyData.label || '';
+            keyBtn.dataset.code = keyData.code || '';
+        }
         rowDiv.appendChild(keyBtn);
     });
     vkContainer.appendChild(rowDiv);
 });
+
+
+
+// Global multi-touch handler for Virtual Keyboard
+const vkActiveKeys = new Map();
+
+function sendKeyGlobal(code, val) {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'key', code: code, val: val }));
+    }
+}
+
+function handleVkTouches(e) {
+    e.preventDefault();
+    const currentTouches = e.touches;
+    const currentlyPressed = new Set();
+    
+    for (let i = 0; i < currentTouches.length; i++) {
+        const touch = currentTouches[i];
+        const el = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (el && el.classList.contains('vk-key')) {
+            currentlyPressed.add(el);
+        }
+    }
+    
+    // newly pressed
+    currentlyPressed.forEach(el => {
+        if (!vkActiveKeys.has(el)) {
+            vkActiveKeys.set(el, true);
+            el.classList.add('active');
+            triggerVibration();
+            sendKeyGlobal(el.dataset.code, 1);
+        }
+    });
+    
+    // newly released
+    vkActiveKeys.forEach((_, el) => {
+        if (!currentlyPressed.has(el)) {
+            vkActiveKeys.delete(el);
+            el.classList.remove('active');
+            sendKeyGlobal(el.dataset.code, 0);
+        }
+    });
+}
+
+vkContainer.addEventListener('touchstart', handleVkTouches, {passive: false});
+vkContainer.addEventListener('touchmove', handleVkTouches, {passive: false});
+vkContainer.addEventListener('touchend', handleVkTouches, {passive: false});
+vkContainer.addEventListener('touchcancel', handleVkTouches, {passive: false});
 
 
 // Map standard chars to EV_KEY constants
@@ -700,3 +801,66 @@ hiddenInput.addEventListener('keydown', (e) => {
     setTimeout(() => { hiddenInput.value = ''; }, 10);
 });
 
+
+
+// Theme Switcher Logic
+const themeSelector = document.getElementById('theme-selector');
+const btnCross = document.querySelector('[data-btn="btn-cross"]');
+const btnCircle = document.querySelector('[data-btn="btn-circle"]');
+const btnSquare = document.querySelector('[data-btn="btn-square"]');
+const btnTriangle = document.querySelector('[data-btn="btn-triangle"]');
+const sysSelect = document.querySelector('.sys-btn[data-btn="btn-select"]');
+const sysStart = document.querySelector('.sys-btn[data-btn="btn-start"]');
+const btnL = document.getElementById('btn-l');
+const btnR = document.getElementById('btn-r');
+
+function applyTheme(theme) {
+    document.body.className = `theme-${theme}`;
+    
+    // Clear custom text for L, R, Select, Start
+    btnL.childNodes[0].textContent = '';
+    btnR.childNodes[0].textContent = '';
+    sysSelect.childNodes[0].textContent = '';
+    sysStart.childNodes[0].textContent = '';
+    
+    if (theme === 'xbox' || theme === 'xbox-premium') {
+        btnCross.childNodes[0].textContent = 'A';
+        btnCircle.childNodes[0].textContent = 'B';
+        btnSquare.childNodes[0].textContent = 'X';
+        btnTriangle.childNodes[0].textContent = 'Y';
+    } else if (theme === 'snes') {
+        btnCross.childNodes[0].textContent = 'B';
+        btnCircle.childNodes[0].textContent = 'A';
+        btnSquare.childNodes[0].textContent = 'Y';
+        btnTriangle.childNodes[0].textContent = 'X';
+        sysSelect.childNodes[0].textContent = 'SELECT';
+        sysStart.childNodes[0].textContent = 'START';
+    } else {
+        // PS default
+        btnCross.childNodes[0].textContent = '✖';
+        btnCircle.childNodes[0].textContent = '⭘';
+        btnSquare.childNodes[0].textContent = '◼';
+        btnTriangle.childNodes[0].textContent = '▲';
+        btnL.childNodes[0].textContent = 'L';
+        btnR.childNodes[0].textContent = 'R';
+        sysSelect.childNodes[0].textContent = 'SELECT';
+        sysStart.childNodes[0].textContent = 'START';
+    }
+}
+
+if (themeSelector) {
+    themeSelector.addEventListener('change', (e) => {
+        applyTheme(e.target.value);
+    });
+    // Init default
+    applyTheme(themeSelector.value);
+}
+
+
+// Sensitivity logic
+const sensSelector = document.getElementById('gyro-sensitivity');
+if (sensSelector) {
+    sensSelector.addEventListener('change', (e) => {
+        maxTilt = parseInt(e.target.value, 10);
+    });
+}

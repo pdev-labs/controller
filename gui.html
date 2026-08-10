@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Universal PC Controller - Server</title>
+    <style>
+        body {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+        h1 { margin-bottom: 5px; color: #f0f0f0; }
+        .status { color: #4CAF50; font-weight: bold; margin-bottom: 20px; }
+        .url { font-size: 24px; color: #4db8ff; margin: 20px 0; padding: 10px 20px; background: #2a2a2a; border-radius: 8px; user-select: text; }
+        img#qrcode { margin: 20px 0; border: 8px solid #ffffff; border-radius: 8px; width: 250px; height: 250px; }
+        .instructions { color: #aaaaaa; max-width: 450px; font-size: 15px; line-height: 1.5; }
+    </style>
+</head>
+<body>
+    <h1>PSP Controller Server</h1>
+    <div class="status" id="status">Status: Starting...</div>
+    
+    <img id="qrcode" src="" alt="QR Code" style="display: none;" />
+    
+    <div class="url" id="url">Waiting for URL...</div>
+    
+    <div class="instructions">
+        Make sure your phone is connected to the same Wi-Fi network as this PC.<br><br>
+        Scan the QR code with your phone's camera to connect, and accept the "Your connection is not private" warning.
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        ipcRenderer.on('server-info', (event, data) => {
+            document.getElementById('status').innerText = 'Status: ' + data.status;
+            document.getElementById('url').innerText = data.url;
+            
+            const qrImg = document.getElementById('qrcode');
+            qrImg.src = data.qrDataUrl;
+            qrImg.style.display = 'block';
+        });
+    </script>
+</body>
+</html>

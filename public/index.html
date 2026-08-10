@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
     <title>Universal PC Controller</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
     <div class="controller-container">
@@ -24,6 +25,22 @@
                 <div id="connection-status" class="status-dot disconnected"></div>
                 <span>Universal PC Controller</span>
                 <button id="gyro-btn" class="sys-btn md-btn" style="margin-left: 10px; padding: 4px 10px; font-size: 10px;">GYRO OFF<span class="md-ripple"></span></button>
+                <select id="vibration-toggle" class="md-btn" style="background: var(--md-surface-container); border: none; color: var(--md-on-surface); font-size: 10px; margin-left: 5px; padding: 4px; outline: none; border-radius: 4px;">
+                    <option value="on">Haptics ON</option>
+                    <option value="off">Haptics OFF</option>
+                </select>
+                <select id="gyro-sensitivity" class="md-btn" style="background: var(--md-surface-container); border: none; color: var(--md-on-surface); font-size: 10px; margin-left: 5px; padding: 4px; outline: none; border-radius: 4px;">
+                    <option value="60">Low Sens</option>
+                    <option value="30" selected>Med Sens</option>
+                    <option value="15">High Sens</option>
+                </select>
+                <select id="theme-selector" class="md-btn" style="background: var(--md-surface-container); border: none; color: var(--md-on-surface); font-size: 10px; margin-left: 10px; padding: 4px; outline: none; border-radius: 4px;">
+                    <option value="ps">PlayStation</option>
+                    <option value="xbox">Xbox</option>
+                    <option value="xbox-premium">Xbox Series Dark</option>
+                    <option value="snes">SNES</option>
+                </select>
+                <button id="fullscreen-btn" class="sys-btn md-btn" style="margin-left: 10px; padding: 4px 10px; font-size: 14px;" title="Toggle Fullscreen">⛶<span class="md-ripple"></span></button>
             </div>
             <div class="draggable-group" id="group-r">
                 <button id="btn-r" class="trigger-btn r-btn md-btn" data-btn="btn-r">
@@ -85,6 +102,7 @@
                 <div class="sys-buttons">
                     <button class="sys-btn md-btn" data-btn="btn-select">SELECT<span class="md-ripple"></span></button>
                     <button class="sys-btn md-btn" data-btn="btn-start">START<span class="md-ripple"></span></button>
+                    <button id="btn-2x" class="sys-btn md-btn" style="margin-left: 10px; font-weight: bold; background: #FF9800; color: #000;">&gt;&gt;<span class="md-ripple"></span></button>
                 </div>
             </div>
             </div>
@@ -145,6 +163,6 @@
         </div>
     </div>
 
-    <script src="controller.js"></script>
+    <script src="controller.js?v=3"></script>
 </body>
 </html>

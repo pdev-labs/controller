@@ -4,22 +4,34 @@ const fs = require('fs');
 const WebSocket = require('ws');
 const { spawn } = require('child_process');
 const path = require('path');
+const os = require('os');
+const qrcode = require('qrcode-terminal');
 
 const app = express();
+
+app.use(express.static(path.join(__dirname, 'public'), {
+    etag: false,
+    maxAge: 0,
+    setHeaders: (res, path) => {
+        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.setHeader('Pragma', 'no-cache');
+        res.setHeader('Expires', '0');
+    }
+}));
+
 const server = https.createServer({
     key: fs.readFileSync(path.join(__dirname, 'server.key')),
     cert: fs.readFileSync(path.join(__dirname, 'server.cert'))
 }, app);
 const wss = new WebSocket.Server({ server });
 
-app.use(express.static('public'));
 
 // Spawn the Python virtual joystick script
 let joystickProc = null;
 try {
-    const scriptPath = path.join(__dirname, 'virtual_joystick.py');
-    // Using the python virtual environment where evdev is installed
-    joystickProc = spawn(path.join(__dirname, 'venv', 'bin', 'python'), [scriptPath]);
+    const baseDir = __dirname.replace('app.asar', 'app.asar.unpacked');
+    const binaryPath = path.join(baseDir, 'dist', 'virtual_joystick');
+    joystickProc = spawn(binaryPath, []);
     
     joystickProc.stderr.on('data', (data) => {
         console.error(`Joystick Error: ${data}`);
@@ -42,6 +54,7 @@ const buttonMap = {
     'btn-r': 'BTN_TR',
     'btn-start': 'BTN_START',
     'btn-select': 'BTN_SELECT',
+    'btn-thumbr': 'BTN_THUMBR',
     // We map DPAD to DPAD events, but if they are sent as buttons:
     // actually, in controller.js DPAD buttons use these names, so we'll handle them specially.
 };
@@ -133,8 +146,22 @@ wss.on('connection', (ws) => {
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`PSP Controller Server running at https://0.0.0.0:${PORT}`);
-    console.log(`Open https://<YOUR-LOCAL-IP>:${PORT} on your mobile browser.`);
-    console.log(`Note: Accept the "Your connection is not private" warning since we use a self-signed certificate for Gyro support.`);
+    let localIp = '127.0.0.1';
+    const interfaces = os.networkInterfaces();
+    for (const name of Object.keys(interfaces)) {
+        for (const iface of interfaces[name]) {
+            if (iface.family === 'IPv4' && !iface.internal) {
+                localIp = iface.address;
+            }
+        }
+    }
+    const url = `https://${localIp}:${PORT}`;
+    const highlight = "\x1b[36m\x1b[1m";
+    const reset = "\x1b[0m";
+    
+    console.log(`PSP Controller Server running at ${highlight}${url}${reset}`);
+    console.log(`Scan the QR code below to connect from your phone:\n`);
+    qrcode.generate(url, {small: true});
+    console.log(`\nNote: Accept the "Your connection is not private" warning since we use a self-signed certificate for Gyro support.`);
     console.log(`Virtual Xbox 360 Controller is ACTIVE!`);
 });
