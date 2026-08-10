@@ -2,9 +2,11 @@ name: Build Multi-OS Controller
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ main ]
+    tags:
+      - 'v*'
   pull_request:
-    branches: [ master, main ]
+    branches: [ main ]
 
 jobs:
   build:
@@ -80,3 +82,14 @@ jobs:
           dist/*.AppImage
           dist/*.exe
           dist/*.dmg
+
+    - name: Release
+      uses: softprops/action-gh-release@v1
+      if: startsWith(github.ref, 'refs/tags/')
+      with:
+        files: |
+          dist/*.AppImage
+          dist/*.exe
+          dist/*.dmg
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
