@@ -8,7 +8,7 @@ Originally designed to replicate the classic **PlayStation Portable (PSP)** layo
 
 ## ✨ Key Features
 
-- **Native Gamepad Emulation (Linux)**: Emulates a true Xbox 360 controller via the Linux `uinput` kernel module. Your games will recognize your phone exactly as if it were a physical Xbox controller!
+- **Native Gamepad Emulation (Linux & Windows)**: Emulates a true Xbox 360 controller natively via the Linux `uinput` kernel module or the Windows `ViGEmBus` driver. Your games will recognize your phone exactly as if it were a physical Xbox controller!
 - **Keyboard & Mouse Mode**: Seamlessly switch modes to use your phone's touchscreen as a laptop trackpad and keyboard to control your desktop.
 - **Gyroscope Support**: Use your phone's built-in tilt sensors for precise aiming or steering. Includes a real-time sensitivity slider.
 - **Drag-and-Drop Layout Editor**: Don't like where a button is? Move it! Resize, reposition, and save your ideal controller layout directly from your phone's browser.
@@ -42,9 +42,13 @@ This app is most powerful on Linux, where full Xbox Gamepad emulation is support
 3. **Debian/Ubuntu**: Install via `sudo apt install ./psp-controller_*.deb`.
 > **Note:** On the first launch, the app will request your root password. This is completely normal and required to configure the `uinput` drivers so Linux can create the virtual Xbox controller.
 
-### 🪟 Windows & 🍏 macOS
-Download the `.exe` or `.dmg` from the Releases page.
-> **Warning:** Due to strict OS driver limitations, Xbox hardware emulation is currently disabled on Windows and macOS. Only the **Keyboard/Mouse** functionality will work out-of-the-box on these platforms.
+### 🪟 Windows
+Download the `.exe` from the Releases page. 
+Windows now features **full, native Xbox 360 controller emulation** powered by `vgamepad` out of the box!
+
+### 🍏 macOS
+Download the `.dmg` from the Releases page.
+> **Warning:** Due to strict OS driver limitations, Xbox hardware emulation is currently not supported on macOS. Only the **Keyboard/Mouse** functionality will work out-of-the-box on this platform.
 
 ### 📱 Android (Optional, but Awesome!)
 While you can just use your phone's web browser, we also provide a native Android app!
@@ -78,7 +82,7 @@ Want to build it yourself?
 **Prerequisites:**
 - Node.js (v18+)
 - Python 3.10+
-- `pip install evdev pyinstaller` (Linux)
+- `pip install evdev` (Linux), `vgamepad` (Windows), `pynput` (All OS)
 
 **Steps:**
 ```bash
