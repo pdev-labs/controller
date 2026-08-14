@@ -21,11 +21,11 @@ jobs:
           - os: ubuntu-latest
             arch: x64
             target: linux
-            builder-args: "--linux AppImage --x64"
+            builder-args: "--linux AppImage deb --x64"
           - os: ubuntu-latest
             arch: arm64
             target: linux
-            builder-args: "--linux AppImage --arm64"
+            builder-args: "--linux AppImage deb --arm64"
           - os: windows-latest
             arch: x64
             target: win
@@ -84,6 +84,7 @@ jobs:
         path: |
           dist/*.AppImage
           dist/*.AppImage.zsync
+          dist/*.deb
           dist/*.exe
           dist/*.dmg
 
@@ -94,6 +95,7 @@ jobs:
         files: |
           dist/*.AppImage
           dist/*.AppImage.zsync
+          dist/*.deb
           dist/*.exe
           dist/*.dmg
       env:
