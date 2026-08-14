@@ -41,7 +41,7 @@ function checkPermissionsAndStart(win) {
             const { exec } = require('child_process');
             const setupCommand = `pkexec bash -c "echo 'KERNEL==\\"uinput\\", MODE=\\"0666\\"' > /etc/udev/rules.d/99-psp-uinput.rules && udevadm control --reload-rules && udevadm trigger && chmod 666 /dev/uinput"`;
             
-            exec(setupCommand, (error) => {
+            exec(setupCommand, { timeout: 10000 }, (error) => {
                 if (error) {
                     win.webContents.executeJavaScript(`
                         document.getElementById('status').innerText = 'Status: Error (Permissions)';
