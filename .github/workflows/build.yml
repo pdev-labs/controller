@@ -76,7 +76,7 @@ jobs:
         VGAMEPAD_SKIP_VIGEMBUS_INSTALL: 'true'
       run: |
         python -m pip install --upgrade setuptools wheel
-        pip install --progress-bar off vgamepad
+        pip install --progress-bar off git+https://github.com/yannbouteiller/vgamepad.git
 
     - name: Build Python Joystick Engine
       run: pyinstaller --onefile virtual_joystick.py
