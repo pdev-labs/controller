@@ -1,6 +1,6 @@
 {
   "name": "psp-controller",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "PSP Controller App",
   "author": "pdev <pdev@example.com>",
   "license": "GPL-3.0",
@@ -22,6 +22,7 @@
     "express": "^5.2.1",
     "qrcode": "^1.5.4",
     "qrcode-terminal": "^0.12.0",
+    "sudo-prompt": "^9.2.1",
     "ws": "^8.21.3"
   },
   "devDependencies": {
