@@ -91,7 +91,7 @@ document.addEventListener('contextmenu', event => event.preventDefault());
 // Capacitor APK Logic
 let isCapacitor = false;
 try {
-    if ((typeof window !== 'undefined' && window.Capacitor) || typeof AndroidNative !== 'undefined') {
+    if (window.location.hostname === 'localhost' || window.location.protocol === 'file:' || (typeof window !== 'undefined' && window.Capacitor) || typeof AndroidNative !== 'undefined') {
         isCapacitor = true;
     }
 } catch (e) {
