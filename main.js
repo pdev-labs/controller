@@ -70,7 +70,10 @@ function checkPermissionsAndStart(win) {
 }
 
 function startServer(win) {
-    serverProcess = spawn('node', [path.join(__dirname, 'server.js')], { stdio: ['inherit', 'pipe', 'pipe'] });
+    serverProcess = spawn(process.execPath, [path.join(__dirname, 'server.js')], { 
+        env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' },
+        stdio: ['inherit', 'pipe', 'pipe'] 
+    });
     
     serverProcess.stdout.on('data', (data) => {
         const text = data.toString();
