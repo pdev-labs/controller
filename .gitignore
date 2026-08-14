@@ -10,3 +10,8 @@ __pycache__/
 gradle-8.7/
 build/
 dist/
+
+# Sensitive Data & Workspaces
+.agents/
+.env
+android/local.properties

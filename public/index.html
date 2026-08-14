@@ -13,48 +13,52 @@
 <body>
     <div class="controller-container">
         <div id="gamepad-mode" class="mode-container active">
-            <!-- Top Triggers -->
-        <div class="triggers">
-            <div class="draggable-group" id="group-l">
-                <button id="btn-l" class="trigger-btn l-btn md-btn" data-btn="btn-l">
-                    L
-                    <span class="md-ripple"></span>
-                </button>
+            <!-- New Top Bar -->
+            <div class="top-bar">
+                <div class="tb-left">
+                    <button class="tb-btn tb-close" id="close-gamepad-btn">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                        Close
+                    </button>
+                    <div class="tb-divider"></div>
+                    <button class="tb-btn tb-mode" id="cycle-mode-gamepad">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="6" width="20" height="12" rx="4"></rect><circle cx="6.5" cy="12" r="1.5"></circle><path d="M14 10h.01M17 10h.01M14 14h.01M17 14h.01"></path></svg>
+                        Gamepad Mode
+                    </button>
+                    <div class="tb-status">
+                        <div id="connection-status" class="status-dot disconnected"></div>
+                        <span>No Host</span> <span class="status-offline">[offline]</span>
+                    </div>
+                </div>
+                <div class="tb-right">
+                    <button class="tb-btn" id="edit-layout-btn-tb">
+                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        Edit Layout
+                    </button>
+                    <button class="tb-btn tb-theme" id="cycle-gamepad-theme">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="6" width="20" height="12" rx="4"></rect></svg>
+                        <span>Xbox Series</span>
+                    </button>
+                    <button class="tb-btn" id="gyro-btn">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M12 6v12M6 12h12"/></svg>
+                        GYRO OFF
+                    </button>
+                    <button class="tb-btn tb-icon" id="gamepad-settings-btn">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path></svg>
+                    </button>
+                </div>
             </div>
-            <div class="status-indicator">
-                <div id="connection-status" class="status-dot disconnected"></div>
-                <span>Universal PC Controller</span>
-                <button id="gyro-btn" class="sys-btn md-btn" style="margin-left: 10px; padding: 4px 10px; font-size: 10px;">GYRO OFF<span class="md-ripple"></span></button>
-                <select id="vibration-toggle" class="md-btn" style="background: var(--md-surface-container); border: none; color: var(--md-on-surface); font-size: 10px; margin-left: 5px; padding: 4px; outline: none; border-radius: 4px;">
-                    <option value="on">Haptics ON</option>
-                    <option value="off">Haptics OFF</option>
-                </select>
-                <select id="gyro-sensitivity" class="md-btn" style="background: var(--md-surface-container); border: none; color: var(--md-on-surface); font-size: 10px; margin-left: 5px; padding: 4px; outline: none; border-radius: 4px;">
-                    <option value="60">Low Sens</option>
-                    <option value="30" selected>Med Sens</option>
-                    <option value="15">High Sens</option>
-                </select>
-                <select id="theme-selector" class="md-btn" style="background: var(--md-surface-container); border: none; color: var(--md-on-surface); font-size: 10px; margin-left: 10px; padding: 4px; outline: none; border-radius: 4px;">
-                    <option value="ps">PlayStation</option>
-                    <option value="xbox">Xbox</option>
-                    <option value="xbox-premium">Xbox Series Dark</option>
-                    <option value="snes">SNES</option>
-                </select>
-                <button id="fullscreen-btn" class="sys-btn md-btn" style="margin-left: 10px; padding: 4px 10px; font-size: 14px;" title="Toggle Fullscreen">⛶<span class="md-ripple"></span></button>
-            </div>
-            <div class="draggable-group" id="group-r">
-                <button id="btn-r" class="trigger-btn r-btn md-btn" data-btn="btn-r">
-                    R
-                    <span class="md-ripple"></span>
-                </button>
-            </div>
-        </div>
 
-        <!-- Middle Section (D-Pad and Action Buttons) -->
-        <div class="middle-section">
-            <!-- Left Side: D-Pad and Analog -->
-            <div class="left-controls">
-                <div class="draggable-group" id="group-dpad">
+            <div class="gamepad-area">
+                <!-- Left Stick -->
+                <div class="draggable-group" id="group-analog" style="position: absolute; left: 80px; top: 120px;">
+                    <div class="analog-stick-container" id="analog-container">
+                        <div class="analog-stick" id="analog-stick"></div>
+                    </div>
+                </div>
+
+                <!-- D-Pad -->
+                <div class="draggable-group" id="group-dpad" style="position: absolute; left: 240px; bottom: 50px;">
                     <div class="dpad">
                         <button class="dpad-btn up md-btn" data-btn="dpad-up"><span class="md-ripple"></span></button>
                         <button class="dpad-btn right md-btn" data-btn="dpad-right"><span class="md-ripple"></span></button>
@@ -63,94 +67,185 @@
                         <div class="dpad-center"></div>
                     </div>
                 </div>
-                
-                <div class="draggable-group" id="group-analog">
-                    <div class="analog-stick-container" id="analog-container">
-                        <div class="analog-stick" id="analog-stick"></div>
+
+                <!-- Left Bumpers/Triggers -->
+                <div class="draggable-group" id="group-l" style="position: absolute; left: 100px; top: 20px;">
+                    <button id="btn-lb" class="trigger-btn flat-btn" data-btn="btn-l">LB</button>
+                </div>
+
+                <!-- Center buttons -->
+                <div class="draggable-group" id="group-sys" style="position: absolute; left: calc(50% - 90px); bottom: 20px; display: flex; flex-direction: row; align-items: center; gap: 20px;">
+                    <button class="center-circle-btn flat-btn sys-btn" data-btn="btn-select" style="width: 36px; height: 36px; border-radius: 50%;">
+                        <span class="sys-label"></span>
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"></rect><path d="M9 3v18M15 3v18"></path></svg>
+                    </button>
+                    <button class="center-circle-btn flat-btn sys-btn" data-btn="btn-ff" style="width: 36px; height: 36px; border-radius: 50%;">
+                        <span class="sys-label" style="font-weight: bold; font-size: 16px;">&gt;&gt;</span>
+                    </button>
+                    <button class="center-circle-btn flat-btn sys-btn" data-btn="btn-start" style="width: 36px; height: 36px; border-radius: 50%;">
+                        <span class="sys-label"></span>
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>
+                    </button>
+                </div>
+
+                <!-- Right Bumpers/Triggers -->
+                <div class="draggable-group" id="group-r" style="position: absolute; right: 100px; top: 20px;">
+                    <button id="btn-rb" class="trigger-btn flat-btn" data-btn="btn-r">RB</button>
+                </div>
+
+                <!-- Right Action Buttons -->
+                <div class="draggable-group" id="group-actions" style="position: absolute; right: 80px; top: 120px;">
+                    <div class="action-buttons diamond-layout">
+                        <button class="action-btn y-btn flat-btn md-btn" data-btn="btn-triangle">
+                            <span style="color:#FBC02D; font-weight: bold; font-size: 20px;">Y</span><span class="md-ripple"></span>
+                        </button>
+                        <div class="action-middle-row">
+                            <button class="action-btn x-btn flat-btn md-btn" data-btn="btn-square">
+                                <span style="color:#2196F3; font-weight: bold; font-size: 20px;">X</span><span class="md-ripple"></span>
+                            </button>
+                            <button class="action-btn b-btn flat-btn md-btn" data-btn="btn-circle">
+                                <span style="color:#F44336; font-weight: bold; font-size: 20px;">B</span><span class="md-ripple"></span>
+                            </button>
+                        </div>
+                        <button class="action-btn a-btn flat-btn md-btn" data-btn="btn-cross">
+                            <span style="color:#4CAF50; font-weight: bold; font-size: 20px;">A</span><span class="md-ripple"></span>
+                        </button>
                     </div>
                 </div>
-            </div>
-
-            <!-- Right Side: Action Buttons -->
-            <div class="right-controls">
-                <div class="draggable-group" id="group-actions">
-                    <div class="action-buttons">
-                        <button class="action-btn triangle md-btn md-fab" data-btn="btn-triangle">
-                            <span class="md-ripple"></span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3L22 21H2L12 3Z"/></svg>
-                        </button>
-                        <button class="action-btn circle md-btn md-fab" data-btn="btn-circle">
-                            <span class="md-ripple"></span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
-                        </button>
-                        <button class="action-btn cross md-btn md-fab" data-btn="btn-cross">
-                            <span class="md-ripple"></span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6L18 18"/></svg>
-                        </button>
-                        <button class="action-btn square md-btn md-fab" data-btn="btn-square">
-                            <span class="md-ripple"></span>
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18"/></svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bottom Section: Start / Select -->
-        <div class="bottom-section">
-            <div class="draggable-group" id="group-sys">
-                <div class="sys-buttons">
-                    <button class="sys-btn md-btn" data-btn="btn-select">SELECT<span class="md-ripple"></span></button>
-                    <button class="sys-btn md-btn" data-btn="btn-start">START<span class="md-ripple"></span></button>
-                    <button id="btn-2x" class="sys-btn md-btn" style="margin-left: 10px; font-weight: bold; background: #FF9800; color: #000;">&gt;&gt;<span class="md-ripple"></span></button>
-                </div>
-            </div>
             </div>
         </div>
 
         <div id="trackpad-mode" class="mode-container hidden">
-            <div class="trackpad-header">
-                <h3>Trackpad</h3>
-                <button id="keyboard-btn" class="sys-btn md-btn md-filled">KEYBOARD<span class="md-ripple"></span></button>
+            <!-- New Top Bar -->
+            <div class="top-bar">
+                <div class="tb-left">
+                    <button class="tb-btn tb-close" id="close-trackpad-btn">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                        Close
+                    </button>
+                    <div class="tb-divider"></div>
+                    <button class="tb-btn tb-mode" id="cycle-mode-trackpad">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M12 5v14"></path></svg>
+                        Touchpad Mode
+                    </button>
+                    <div class="tb-status">
+                        <div id="trackpad-connection-status" class="status-dot disconnected"></div>
+                        <span>No Host</span> <span class="status-offline">[offline]</span>
+                    </div>
+                </div>
+                <div class="tb-right">
+                    <button class="tb-btn tb-icon-text" id="tp-numpad-btn">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="4" y="4" width="16" height="16" rx="2"></rect><path d="M4 12h16M12 4v16"></path></svg>
+                        <span>Numpad</span>
+                    </button>
+                    <button class="tb-btn tb-icon-text" id="tp-clickpad-btn">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M12 5v14"></path></svg>
+                        <span>Clickpad</span>
+                    </button>
+                    <button class="tb-btn tb-icon-text" id="tp-sens-btn">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <span>2.0x</span>
+                    </button>
+                    <button class="tb-btn tb-icon-text" id="tp-theme-btn">
+                        <span style="display:inline-block; width:8px; height:8px; border:1px solid #888; border-radius:2px; margin-right:4px;"></span>
+                        <span>Black</span>
+                    </button>
+                    <button class="tb-btn tb-icon" id="tp-settings-btn">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"></path></svg>
+                    </button>
+                </div>
             </div>
+            
             <div id="trackpad-surface" class="trackpad-surface">
                 <!-- Hidden input for mobile keyboard -->
                 <input type="text" id="hidden-keyboard-input" class="hidden-input">
-                <div class="trackpad-hint">1-Finger: Move & Tap to Click<br>2-Finger: Scroll & Tap for Right Click</div>
             </div>
         </div>
 
         <div id="keyboard-mode" class="mode-container hidden">
-            <div class="trackpad-header">
-                <h3>PC Keyboard</h3>
-                <button id="close-keyboard-btn" class="sys-btn md-btn md-filled">CLOSE<span class="md-ripple"></span></button>
-            </div>
-            <div id="vk-container" class="vk-container"></div>
-        </div>
-        
-        <!-- Fullscreen overlay for connecting -->
-        <div id="overlay" class="overlay">
-            <div class="overlay-content md-sheet">
-                <h1 style="color: var(--md-primary); margin-bottom: 5px; font-weight: 500;">Universal Controller</h1>
-                <p style="color: var(--md-secondary); font-size: 14px; margin-bottom: 15px;">Select Mode:</p>
-                <div style="display: flex; gap: 15px; margin-bottom: 20px;">
-                    <button id="sel-gamepad" class="sys-btn md-btn active" style="padding: 10px 20px;">🎮 Gamepad<span class="md-ripple"></span></button>
-                    <button id="sel-trackpad" class="sys-btn md-btn" style="padding: 10px 20px;">🖱️ Trackpad<span class="md-ripple"></span></button>
-                </div>
-                <div id="apk-ip-container" style="display: none; flex-direction: column; align-items: center; margin-bottom: 20px; width: 100%;">
-                    <p style="color: var(--md-secondary); font-size: 12px; margin-bottom: 8px;">Enter PC IP Address:</p>
-                    <input type="text" id="apk-ip-input" placeholder="e.g. 192.168.1.5" style="padding: 10px; border-radius: 8px; border: 1px solid var(--md-outline); background: var(--md-surface); color: var(--md-on-surface); text-align: center; font-size: 16px; width: 200px; margin-bottom: 15px;">
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
-                        <button id="scan-qr-btn" class="sys-btn md-btn md-outlined" style="padding: 8px 15px;">📷 Scan QR</button>
-                        <button id="auto-detect-btn" class="sys-btn md-btn md-outlined" style="padding: 8px 15px;">🔍 Auto-Detect</button>
+            <!-- New Top Bar -->
+            <div class="top-bar">
+                <div class="tb-left">
+                    <button class="tb-btn tb-close" id="close-keyboard-btn">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 6L6 18M6 6l12 12"></path></svg>
+                        Close
+                    </button>
+                    <div class="tb-divider"></div>
+                    <button class="tb-btn tb-mode" id="cycle-mode-keyboard">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8"></path></svg>
+                        Keyboard Mode
+                    </button>
+                    <div class="tb-status">
+                        <div id="keyboard-connection-status" class="status-dot disconnected"></div>
+                        <span>No Host</span> <span class="status-offline">[offline]</span>
                     </div>
                 </div>
-                <div id="qr-reader-container" style="display: none; flex-direction: column; align-items: center; margin-bottom: 20px; width: 100%;">
-                    <div id="qr-reader" style="width: 250px; border-radius: 8px; overflow: hidden; background: #000;"></div>
-                    <button id="cancel-qr-btn" class="sys-btn md-btn md-outlined" style="margin-top: 10px; padding: 8px 15px;">Cancel Scan</button>
+                <div class="tb-right">
+                    <div class="tb-indicators">
+                        <span class="ind" id="ind-caps"><div class="dot"></div>CAPS</span>
+                        <span class="ind" id="ind-num"><div class="dot"></div>NUM</span>
+                        <span class="ind" id="ind-scr"><div class="dot"></div>SCR</span>
+                    </div>
+                    <button id="kb-sound-toggle" class="tb-btn tb-icon-text">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>
+                        <span>Cherry MX Browns</span>
+                    </button>
+                    <button id="kb-theme-toggle" class="tb-btn tb-icon-text">
+                        <span style="display:inline-block; width:8px; height:8px; border:1px solid #888; border-radius:2px; margin-right:4px;"></span>
+                        <span>Black</span>
+                    </button>
+                    <button id="kb-vib-toggle" class="tb-btn tb-icon-text">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0z"></path><path d="M8 12l2 2 4-4"></path></svg>
+                        <span>Vibration On</span>
+                    </button>
                 </div>
-                <button id="connect-btn" class="connect-btn md-btn md-filled">Connect & Fullscreen<span class="md-ripple"></span></button>
-                <button id="edit-layout-btn" class="edit-layout-btn md-btn md-outlined">Customize Layout<span class="md-ripple"></span></button>
+            </div>
+            
+            <div class="kb-wrapper">
+                <div id="vk-container" class="vk-container"></div>
+            </div>
+        </div>
+        
+        <!-- Fullscreen Home Screen (replaces overlay) -->
+        <div id="overlay" class="home-screen">
+            <div class="home-header">
+                <div></div> <!-- Empty div to keep the flex-between layout working properly -->
+                <button class="icon-btn">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                </button>
+            </div>
+            
+            <div class="home-center">
+                <div class="connection-icon">
+                    <svg viewBox="0 0 24 24" width="48" height="48" stroke="currentColor" stroke-width="2" fill="none"><path d="M21.2 15c.7-1.2 1-2.5.7-3.9-.6-2-2.4-3.5-4.4-3.5h-1.2c-.7-3-3.2-5.2-6.2-5.6-3-.3-5.9 1.3-7.3 4-1.2 2.5-1 5.4.5 7.6M12 18V12l-3 3M12 12l3 3M22 22L2 2"></path></svg>
+                </div>
+                <h3>Connect to PC</h3>
+                <p>Select a method to connect to the PC Host.</p>
+                
+                <div id="apk-ip-container" class="connection-methods" style="display: none;">
+                    <button id="scan-qr-btn" class="pill-btn secondary">Scan QR Code</button>
+                    <button id="auto-detect-btn" class="pill-btn secondary">Auto Detect</button>
+                    <div class="manual-entry">
+                        <input type="text" id="apk-ip-input" placeholder="e.g. 192.168.1.5">
+                        <button id="connect-btn" class="pill-btn primary" style="width: auto;">Connect</button>
+                    </div>
+                </div>
+
+                <div id="qr-reader-container" style="display: none; flex-direction: column; align-items: center; width: 100%;">
+                    <div id="qr-reader" style="width: 250px; border-radius: 12px; overflow: hidden; background: #000;"></div>
+                    <button id="cancel-qr-btn" class="pill-btn secondary" style="margin-top: 20px;">Cancel Scan</button>
+                </div>
+            </div>
+
+            <div class="home-bottom-bar">
+                <button id="cycle-mode-btn" class="circle-btn">
+                    <svg id="cycle-icon-gamepad" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                </button>
+                <button id="launch-mode-btn" class="pill-btn primary launch-btn">
+                    <span>^</span>
+                    <span id="launch-mode-text">Launch Gamepad</span>
+                </button>
+                <button id="edit-layout-btn" class="circle-btn" style="display: none;">Edit</button>
             </div>
         </div>
         
@@ -167,9 +262,64 @@
             </div>
             <div class="edit-footer md-sheet">
                 <input type="range" id="scale-slider" min="0.5" max="2" step="0.05" value="1" class="md-slider">
-                <div class="edit-actions">
+                <div class="edit-actions" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
                     <button id="reset-layout-btn" class="danger-btn md-btn md-filled-error">Reset<span class="md-ripple"></span></button>
                     <button id="save-layout-btn" class="success-btn md-btn md-filled">Save Layout<span class="md-ripple"></span></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal Overlay (hidden by default) -->
+        <div id="settings-modal" class="modal-overlay hidden">
+            <div class="modal-content md-sheet">
+                <h3 style="color: var(--md-primary); margin-top: 0;">Settings</h3>
+                
+                <div class="setting-item">
+                    <label>Server IP Address:</label>
+                    <input type="text" id="setting-ip" placeholder="e.g. 192.168.1.5" class="md-input">
+                </div>
+
+                <div class="setting-item" style="margin-top: 15px;">
+                    <label>Gamepad Theme:</label>
+                    <select id="theme-selector" class="md-input">
+                        <option value="playstation">PlayStation (Classic)</option>
+                        <option value="ps5-premium">PlayStation 5 (Premium)</option>
+                        <option value="xbox">Xbox</option>
+                        <option value="xbox-premium">Xbox (Premium)</option>
+                        <option value="snes">SNES (Retro)</option>
+                        <option value="psp">PSP (Optimized)</option>
+                    </select>
+                </div>
+                
+                <div class="setting-item" style="display: flex; justify-content: space-between; align-items: center;">
+                    <label>Haptic Feedback (Vibration):</label>
+                    <label class="md-switch">
+                        <input type="checkbox" id="setting-vib" checked>
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                
+                <div class="setting-item" style="margin-top: 15px;">
+                    <label style="display: flex; justify-content: space-between;">
+                        <span>Gyro Sensitivity:</span>
+                        <span id="gyro-sens-val" style="font-weight: bold; color: var(--md-primary);">45</span>
+                    </label>
+                    <input type="range" id="gyro-sensitivity" min="5" max="90" value="45" class="md-input" style="width: 100%; padding: 0; margin-top: 5px;">
+                </div>
+
+                <div class="modal-actions" style="margin-top: 20px; display: flex; justify-content: flex-end; gap: 10px;">
+                    <button id="close-settings-btn" class="md-btn md-outlined">Cancel<span class="md-ripple"></span></button>
+                    <button id="save-settings-btn" class="md-btn md-filled success-btn">Save<span class="md-ripple"></span></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Alert Overlay (hidden by default) -->
+        <div id="alert-modal" class="modal-overlay hidden" style="z-index: 2000;">
+            <div class="modal-content md-sheet" style="max-width: 350px;">
+                <p id="alert-message" style="color: var(--md-on-surface); margin-bottom: 20px; line-height: 1.5;"></p>
+                <div style="display: flex; justify-content: flex-end;">
+                    <button id="alert-ok-btn" class="md-btn md-filled">OK<span class="md-ripple"></span></button>
                 </div>
             </div>
         </div>

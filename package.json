@@ -7,13 +7,17 @@
   "scripts": {
     "start": "electron .",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build-appimage": "electron-builder --linux AppImage"
+    "build-appimage": "electron-builder --linux AppImage",
+    "build-linux": "electron-builder --linux"
   },
   "keywords": [],
   "type": "commonjs",
   "dependencies": {
     "@capacitor/core": "^8.5.0",
+    "@capacitor/screen-orientation": "^8.0.1",
+    "@capacitor/status-bar": "^8.0.3",
     "cordova": "^13.0.0",
+    "cordova-plugin-networkinterface": "^2.2.0",
     "express": "^5.2.1",
     "qrcode": "^1.5.4",
     "qrcode-terminal": "^0.12.0",
@@ -29,9 +33,17 @@
     "appId": "com.psp.controller",
     "linux": {
       "target": [
-        "AppImage"
+        "AppImage",
+        "deb",
+        "rpm"
       ],
       "category": "Utility"
+    },
+    "deb": {
+      "afterInstall": "build/linux/postinst"
+    },
+    "rpm": {
+      "afterInstall": "build/linux/postinst"
     },
     "win": {
       "target": [

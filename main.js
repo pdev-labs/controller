@@ -47,19 +47,19 @@ function checkPermissionsAndStart(win) {
                         document.getElementById('status').innerText = 'Status: Error (Permissions)';
                         document.getElementById('status').style.color = '#f44336';
                         document.getElementById('url').innerText = 'Missing Controller Permissions!';
-                        document.querySelector('.instructions').innerHTML = \\\`
+                        document.querySelector('.instructions').innerHTML = \`
                             <b style="color: #ff9800;">Setup Failed:</b><br><br>
                             Could not acquire permissions automatically.<br>
                             Please run this command in your terminal manually:<br>
                             <code style="background: #333; padding: 4px; border-radius: 4px; display: inline-block; margin-top: 10px;">sudo bash -c "echo 'KERNEL==\\\\\\"uinput\\\\\\", MODE=\\\\\\"0666\\\\\\"' > /etc/udev/rules.d/99-psp-uinput.rules && udevadm control --reload-rules && udevadm trigger && chmod 666 /dev/uinput"</code><br><br>
                             Then restart the app.
-                        \\\`;
-                    `);
+                        \`;
+                    `).catch(err => console.error("Renderer execute error:", err));
                 } else {
                     win.webContents.executeJavaScript(`
                         document.querySelector('.instructions').innerHTML = 'Permissions granted successfully! Starting server...';
-                    `);
-                    setTimeout(() => startServer(win), 1000);
+                    `).catch(err => console.error("Renderer execute error:", err));
+                    setTimeout(() => startServer(win), 1500);
                 }
             });
         });

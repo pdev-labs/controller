@@ -5,7 +5,13 @@ const config: CapacitorConfig = {
   appName: 'pspcontroller',
   webDir: 'public',
   server: {
-    cleartext: true
+    cleartext: true,
+    androidScheme: 'http'
+  },
+  plugins: {
+    StatusBar: {
+      overlaysWebView: true
+    }
   }
 };
 

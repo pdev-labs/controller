@@ -68,6 +68,7 @@ const buttonMap = {
     'btn-start': 'BTN_START',
     'btn-select': 'BTN_SELECT',
     'btn-thumbr': 'BTN_THUMBR',
+    'btn-ff': 'BTN_TR2',
     // We map DPAD to DPAD events, but if they are sent as buttons:
     // actually, in controller.js DPAD buttons use these names, so we'll handle them specially.
 };
@@ -94,6 +95,16 @@ const handleWsConnection = (ws) => {
                         type: 'dpad',
                         x: x,
                         y: y
+                    }) + '\n');
+                    return;
+                }
+
+                // Fast forward mapped to TAB key
+                if (data.button === 'btn-ff') {
+                    joystickProc.stdin.write(JSON.stringify({
+                        type: 'key',
+                        code: 'KEY_TAB',
+                        val: data.status === 'pressed' ? 1 : 0
                     }) + '\n');
                     return;
                 }
