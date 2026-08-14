@@ -7,16 +7,27 @@ const QRCode = require('qrcode');
 let serverProcess = null;
 
 function getLocalIp() {
-    let localIp = '127.0.0.1';
     const interfaces = os.networkInterfaces();
+    let backupIp = null;
+    
     for (const name of Object.keys(interfaces)) {
+        // Skip common virtual/Docker/VPN interfaces
+        if (name.includes('docker') || name.includes('veth') || name.includes('virbr') || name.includes('tailscale') || name.includes('tun') || name.includes('tap') || name.includes('vmware') || name.includes('vboxnet')) {
+            continue;
+        }
+        
         for (const iface of interfaces[name]) {
             if (iface.family === 'IPv4' && !iface.internal) {
-                localIp = iface.address;
+                // If it looks like a physical interface (wlan, eth, en), return it immediately
+                if (name.startsWith('wlan') || name.startsWith('wlp') || name.startsWith('eth') || name.startsWith('en')) {
+                    return iface.address;
+                }
+                // Otherwise save it as a backup
+                if (!backupIp) backupIp = iface.address;
             }
         }
     }
-    return localIp;
+    return backupIp || '127.0.0.1';
 }
 
 function checkPermissionsAndStart(win) {

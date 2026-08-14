@@ -140,15 +140,27 @@ httpServer.listen(PORT, '0.0.0.0', () => {
 });
 
 httpsServer.listen(HTTPS_PORT, '0.0.0.0', () => {
-    let localIp = '127.0.0.1';
+    let localIp = null;
     const interfaces = os.networkInterfaces();
+    
     for (const name of Object.keys(interfaces)) {
+        if (name.includes('docker') || name.includes('veth') || name.includes('virbr') || name.includes('tailscale') || name.includes('tun') || name.includes('tap') || name.includes('vmware') || name.includes('vboxnet')) {
+            continue;
+        }
+        
         for (const iface of interfaces[name]) {
             if (iface.family === 'IPv4' && !iface.internal) {
-                localIp = iface.address;
+                if (name.startsWith('wlan') || name.startsWith('wlp') || name.startsWith('eth') || name.startsWith('en')) {
+                    localIp = iface.address;
+                    break;
+                }
+                if (!localIp) localIp = iface.address;
             }
         }
+        if (localIp && (name.startsWith('wlan') || name.startsWith('wlp') || name.startsWith('eth') || name.startsWith('en'))) break;
     }
+    
+    localIp = localIp || '127.0.0.1';
     const url = `https://${localIp}:${HTTPS_PORT}`;
     const highlight = "\x1b[36m\x1b[1m";
     const reset = "\x1b[0m";
