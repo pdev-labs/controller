@@ -136,10 +136,9 @@ setOrientation('portrait');
 const apkIpContainer = document.getElementById('apk-ip-container');
 const apkIpInput = document.getElementById('apk-ip-input');
 
-if (isCapacitor && apkIpContainer && apkIpInput) {
+if (apkIpContainer && apkIpInput) {
     const fsBtn = document.getElementById('fullscreen-btn');
     if (fsBtn) fsBtn.style.display = 'none';
-    apkIpContainer.style.display = 'flex';
     const savedIp = localStorage.getItem('pc-ip');
     if (savedIp) {
         apkIpInput.value = savedIp;
@@ -147,7 +146,7 @@ if (isCapacitor && apkIpContainer && apkIpInput) {
 }
 
 connectBtn.addEventListener('click', () => {
-    if (isCapacitor && apkIpInput) {
+    if (apkIpInput) {
         const ip = apkIpInput.value.trim();
         if (!ip) {
             showCustomAlert('Please enter your PC IP address');
@@ -349,23 +348,29 @@ if (pinCancel) {
 
 function connectWebSocket() {
     let host = window.location.hostname;
-    let port = isCapacitor ? '3000' : (window.location.port || '3001');
+    let port = window.location.port || '3001';
+    let protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
     
-    if (isCapacitor) {
-        const savedIp = localStorage.getItem('pc-ip');
-        if (savedIp) {
-            try {
-                const url = new URL(savedIp.includes('://') ? savedIp : 'http://' + savedIp);
-                host = url.hostname;
-            } catch(e) {
-                host = savedIp;
-            }
+    // If running from local file or Capacitor, default to port 3000
+    if (isCapacitor || window.location.hostname === 'localhost' || window.location.protocol === 'file:') {
+        port = '3000';
+        protocol = 'ws';
+    }
+    
+    const savedIp = localStorage.getItem('pc-ip');
+    if (savedIp) {
+        try {
+            const url = new URL(savedIp.includes('://') ? savedIp : 'http://' + savedIp);
+            host = url.hostname;
+            port = url.port || '3000'; // Manual IP implies direct connection
+            protocol = 'ws'; // Direct connection is always ws://
+        } catch(e) {
+            host = savedIp;
+            port = '3000';
+            protocol = 'ws';
         }
     }
     
-    // If it's a native app, we use ws://
-    // If we're serving HTTPS locally on browser, we use wss
-    const protocol = isCapacitor ? 'ws' : (window.location.protocol === 'https:' ? 'wss' : 'ws');
     ws = new WebSocket(`${protocol}://${host}:${port}`);
 
     ws.onopen = () => {
@@ -1440,3 +1445,7 @@ if (sensSelector) {
 }
 
 
+// Auto-connect if web browser (not loaded from file or localhost)
+if (window.location.protocol !== 'file:' && window.location.hostname !== 'localhost') {
+    connectWebSocket();
+}
