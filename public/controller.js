@@ -305,6 +305,48 @@ if (fullscreenBtn) {
     });
 }
 
+// PIN Auth UI Logic
+const pinModal = document.getElementById('pin-modal');
+const pinInput = document.getElementById('pin-input');
+const pinSubmit = document.getElementById('pin-submit-btn');
+const pinCancel = document.getElementById('pin-cancel-btn');
+
+function showPinModal(hasError = false) {
+    if (hasError) {
+        pinInput.style.borderColor = '#f44336';
+        pinInput.value = '';
+        pinInput.placeholder = 'INVALID';
+        setTimeout(() => {
+            pinInput.style.borderColor = 'var(--md-primary)';
+            pinInput.placeholder = '0000';
+        }, 2000);
+    }
+    pinModal.classList.remove('hidden');
+    pinInput.focus();
+}
+
+function hidePinModal() {
+    pinModal.classList.add('hidden');
+}
+
+if (pinSubmit) {
+    pinSubmit.addEventListener('click', () => {
+        const pin = pinInput.value.trim();
+        if (pin.length === 4) {
+            localStorage.setItem('auth-pin', pin);
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'auth', pin: pin }));
+            }
+        }
+    });
+}
+if (pinCancel) {
+    pinCancel.addEventListener('click', () => {
+        hidePinModal();
+        if (ws) ws.close(); // Cancel connection
+    });
+}
+
 function connectWebSocket() {
     let host = window.location.hostname;
     let port = isCapacitor ? '3000' : (window.location.port || '3001');
@@ -327,21 +369,38 @@ function connectWebSocket() {
     ws = new WebSocket(`${protocol}://${host}:${port}`);
 
     ws.onopen = () => {
-        document.querySelectorAll('.status-dot').forEach(el => {
-            el.classList.remove('disconnected');
-            el.classList.add('connected');
-        });
-        document.querySelectorAll('.tb-status span:first-of-type').forEach(el => {
-            el.textContent = host;
-        });
-        document.querySelectorAll('.tb-status span.status-offline').forEach(el => {
-            el.textContent = '[online]';
-            el.style.color = '#4CAF50';
-        });
+        // Authenticate immediately
+        const savedPin = localStorage.getItem('auth-pin');
+        if (savedPin) {
+            ws.send(JSON.stringify({ type: 'auth', pin: savedPin }));
+        } else {
+            showPinModal();
+        }
     };
 
     ws.onmessage = (event) => {
-        // Obsolete auto-map handler removed
+        try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'auth_error') {
+                localStorage.removeItem('auth-pin');
+                showPinModal(true);
+            } else if (data.type === 'auth_success') {
+                hidePinModal();
+                
+                // Update UI state to connected
+                document.querySelectorAll('.status-dot').forEach(el => {
+                    el.classList.remove('disconnected');
+                    el.classList.add('connected');
+                });
+                document.querySelectorAll('.tb-status span:first-of-type').forEach(el => {
+                    el.textContent = host;
+                });
+                document.querySelectorAll('.tb-status span.status-offline').forEach(el => {
+                    el.textContent = '[online]';
+                    el.style.color = '#4CAF50';
+                });
+            }
+        } catch(e) {}
     };
 
     ws.onclose = () => {
@@ -1377,5 +1436,68 @@ if (sensSelector) {
     sensSelector.addEventListener('input', (e) => {
         maxTilt = parseInt(e.target.value, 10);
         if (sensValDisplay) sensValDisplay.textContent = maxTilt;
+    });
+}
+
+// ================= TRACKPAD LOGIC =================
+const trackpadSurface = document.getElementById('trackpad-surface');
+let tpActive = false;
+let tpTouches = 0;
+let tpLastX = 0, tpLastY = 0;
+let tpStartTime = 0;
+let tpStartX = 0, tpStartY = 0;
+
+if (trackpadSurface) {
+    trackpadSurface.addEventListener('touchstart', (e) => {
+        tpActive = true;
+        tpTouches = e.touches.length;
+        tpLastX = e.touches[0].clientX;
+        tpLastY = e.touches[0].clientY;
+        
+        if (tpTouches === 1) {
+            tpStartX = tpLastX;
+            tpStartY = tpLastY;
+            tpStartTime = Date.now();
+        }
+        e.preventDefault();
+    }, {passive: false});
+
+    trackpadSurface.addEventListener('touchmove', (e) => {
+        if (!tpActive) return;
+        e.preventDefault();
+        
+        const currentX = e.touches[0].clientX;
+        const currentY = e.touches[0].clientY;
+        
+        const dx = currentX - tpLastX;
+        const dy = currentY - tpLastY;
+        
+        tpLastX = currentX;
+        tpLastY = currentY;
+
+        if (tpTouches === 1) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                // scale speed by 1.5 for better feel
+                ws.send(JSON.stringify({ type: 'mouse_move', dx: dx * 1.5, dy: dy * 1.5 }));
+            }
+        } else if (tpTouches === 2) {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(JSON.stringify({ type: 'mouse_scroll', dx: -dx * 0.5, dy: dy * 0.5 }));
+            }
+        }
+    }, {passive: false});
+
+    trackpadSurface.addEventListener('touchend', (e) => {
+        if (tpTouches === 1 && Date.now() - tpStartTime < 200) {
+            // Tap detected (duration < 200ms, and minimal movement)
+            if (Math.abs(tpLastX - tpStartX) < 10 && Math.abs(tpLastY - tpStartY) < 10) {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({ type: 'mouse_click', button: 'left' }));
+                    triggerVibration();
+                }
+            }
+        }
+        tpActive = false;
+        tpTouches = 0;
     });
 }

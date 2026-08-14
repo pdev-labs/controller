@@ -30,6 +30,7 @@
     <img id="qrcode" src="" alt="QR Code" style="display: none;" />
     
     <div class="url" id="url">Waiting for URL...</div>
+    <div class="url" id="pin-display" style="color: #ff9800; display: none;">PIN: <span id="pin-code"></span></div>
     
     <div class="instructions">
         Make sure your phone is connected to the same Wi-Fi network as this PC.<br><br>
@@ -46,6 +47,11 @@
             const qrImg = document.getElementById('qrcode');
             qrImg.src = data.qrDataUrl;
             qrImg.style.display = 'block';
+        });
+
+        ipcRenderer.on('server-pin', (event, pin) => {
+            document.getElementById('pin-code').innerText = pin;
+            document.getElementById('pin-display').style.display = 'block';
         });
     </script>
 </body>

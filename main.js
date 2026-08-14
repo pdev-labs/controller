@@ -67,7 +67,21 @@ function checkPermissionsAndStart(win) {
 }
 
 function startServer(win) {
-    serverProcess = spawn('node', [path.join(__dirname, 'server.js')], { stdio: 'inherit' });
+    serverProcess = spawn('node', [path.join(__dirname, 'server.js')], { stdio: ['inherit', 'pipe', 'pipe'] });
+    
+    serverProcess.stdout.on('data', (data) => {
+        const text = data.toString();
+        process.stdout.write(text); // still output to terminal
+        
+        const pinMatch = text.match(/\[AUTH\] SERVER_PIN:(\d+)/);
+        if (pinMatch && pinMatch[1]) {
+            win.webContents.send('server-pin', pinMatch[1]);
+        }
+    });
+    
+    serverProcess.stderr.on('data', (data) => {
+        process.stderr.write(data.toString());
+    });
 
     win.webContents.on('did-finish-load', async () => {
         const ip = getLocalIp();
