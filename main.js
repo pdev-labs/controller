@@ -51,7 +51,10 @@ function checkPermissionsAndStart(win) {
                             <b style="color: #ff9800;">Setup Failed:</b><br><br>
                             Could not acquire permissions automatically.<br>
                             Please run this command in your terminal manually:<br>
-                            <code style="background: #333; padding: 4px; border-radius: 4px; display: inline-block; margin-top: 10px;">sudo bash -c "echo 'KERNEL==\\\\\\"uinput\\\\\\", MODE=\\\\\\"0666\\\\\\"' > /etc/udev/rules.d/99-psp-uinput.rules && udevadm control --reload-rules && udevadm trigger && chmod 666 /dev/uinput"</code><br><br>
+                            <div style="display: flex; align-items: stretch; justify-content: center; margin-top: 10px; margin-bottom: 10px;">
+                                <code id="fallback-cmd" style="background: #333; padding: 8px; border-radius: 4px 0 0 4px; border: 1px solid #555; border-right: none; text-align: left; max-width: 80%;">sudo bash -c "echo 'KERNEL==\\\\\\"uinput\\\\\\", MODE=\\\\\\"0666\\\\\\"' > /etc/udev/rules.d/99-psp-uinput.rules && udevadm control --reload-rules && udevadm trigger && chmod 666 /dev/uinput"</code>
+                                <button onclick="navigator.clipboard.writeText(document.getElementById('fallback-cmd').innerText); this.innerText='Copied!'; setTimeout(()=>this.innerText='Copy', 2000)" style="background: #4CAF50; color: white; border: 1px solid #4CAF50; padding: 8px 16px; border-radius: 0 4px 4px 0; cursor: pointer; font-weight: bold;">Copy</button>
+                            </div>
                             Then restart the app.
                         \`;
                     `).catch(err => console.error("Renderer execute error:", err));
