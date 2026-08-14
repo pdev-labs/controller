@@ -2,14 +2,14 @@
 
 Turn your smartphone into a fully customizable, low-latency virtual gamepad, keyboard, and mouse for your PC! 
 
-Originally designed to replicate the classic **PlayStation Portable (PSP)** layout, this project has evolved into a robust Universal Gamepad solution. It supports **virtual Xbox 360 controller emulation** on Linux, high-quality **haptic feedback**, **gyroscope aiming**, and fully drag-and-drop **customizable layouts**.
+Originally designed to replicate the classic **PlayStation Portable (PSP)** layout, this project has evolved into a robust Universal Gamepad solution. It supports cross-platform game control natively on **Linux, Windows, and macOS**.
 
 ---
 
 ## ✨ Key Features
 
-- **Native Gamepad Emulation (Linux & Windows)**: Emulates a true Xbox 360 controller natively via the Linux `uinput` kernel module or the Windows `ViGEmBus` driver. Your games will recognize your phone exactly as if it were a physical Xbox controller!
-- **Keyboard & Mouse Mode**: Seamlessly switch modes to use your phone's touchscreen as a laptop trackpad and keyboard to control your desktop.
+- **Native Xbox 360 Emulation (Linux & Windows)**: Emulates a true Xbox 360 controller natively via the Linux `uinput` kernel module or the Windows `ViGEmBus` driver. Your PC games will recognize your phone exactly as if it were a physical Xbox controller plugged in!
+- **Keyboard & Mouse Fallback (macOS)**: Play games on your Mac using your phone! Controller inputs are instantly mapped to physical keyboard keys.
 - **Gyroscope Support**: Use your phone's built-in tilt sensors for precise aiming or steering. Includes a real-time sensitivity slider.
 - **Drag-and-Drop Layout Editor**: Don't like where a button is? Move it! Resize, reposition, and save your ideal controller layout directly from your phone's browser.
 - **Gorgeous Themes**: Switch on-the-fly between beautifully crafted controller themes:
@@ -22,56 +22,59 @@ Originally designed to replicate the classic **PlayStation Portable (PSP)** layo
 
 ---
 
-## 🏗 How It Works
+## 🏗 How It Works (Cross-Platform Architecture)
 
 The project is split into a **Desktop Host App** and a **Mobile Client**:
 
-1. **Desktop App (Electron + Node.js + Python)**: Runs quietly on your PC, launching a local web server (on port `8080`) and a WebSocket server (on port `8081`). On Linux, it uses a Python script (`evdev`/`uinput`) to register a virtual hardware joystick.
-2. **Mobile Client (Capacitor / Web)**: You connect to the Desktop App via your phone's web browser or the provided Android APK. The mobile client sends touch and gyro events over the WebSocket connection with ultra-low latency.
+1. **Desktop Host (Your PC / Mac)**: Runs quietly on your computer, launching a local web server (on port `8080`) and a WebSocket server (on port `8081`). It uses Python to securely inject hardware events into your operating system.
+2. **Mobile Client (Your Phone)**: You connect to the Desktop Host via your phone's Wi-Fi. It sends touch and gyro events over the WebSocket connection with ultra-low latency.
+
+### ❓ Clarifying OS Differences (Gamepad vs Keyboard Mode)
+
+Because different operating systems have different security restrictions, the controller acts slightly differently depending on your OS:
+
+- 🐧 **Linux**: **Full Gamepad Support**. The app uses `evdev` to create a virtual Xbox 360 joystick. Games will see it as a real controller.
+- 🪟 **Windows**: **Full Gamepad Support**. The app uses `vgamepad` (ViGEmBus) to create a virtual Xbox 360 joystick. Games will see it as a real controller.
+- 🍏 **macOS**: **Keyboard/Mouse Mode Only**. Apple's strict driver security prevents apps from easily creating fake "gamepads" without kernel extensions. To bypass this, the app translates your phone's buttons into actual Mac keyboard presses (e.g., A/B/X/Y on phone = K/L/J/I on Mac). **You can absolutely still play games on macOS!** Just make sure your game is configured to use Keyboard controls instead of Gamepad controls.
 
 ---
 
-## 🚀 Installation & Downloads
+## 🚀 Step-by-Step Setup Guide
+
+### Step 1: Download & Install on your PC
 
 Head over to the [Releases Page](https://github.com/pdev-labs/controller/releases) to download the latest version for your platform.
 
-### 🐧 Linux (Recommended)
-This app is most powerful on Linux, where full Xbox Gamepad emulation is supported.
+#### 🪟 Windows Setup
+1. Download the `psp-controller-Setup-*.exe` file.
+2. Double-click the installer and follow the prompts.
+3. Open the installed app. Your Windows Firewall may ask you to allow it through—click **Allow** so your phone can connect!
+
+#### 🐧 Linux Setup
 1. Download the `.AppImage` or `.deb` file.
-2. **AppImage**: Make it executable (`chmod +x psp-controller-*.AppImage`) and run it.
-3. **Debian/Ubuntu**: Install via `sudo apt install ./psp-controller_*.deb`.
-> **Note:** On the first launch, the app will request your root password. This is completely normal and required to configure the `uinput` drivers so Linux can create the virtual Xbox controller.
+2. **AppImage**: Right-click the file -> Properties -> Permissions -> "Allow executing file as program". Double-click to run.
+3. **Debian/Ubuntu**: Install via terminal: `sudo apt install ./psp-controller_*.deb`.
+> **Important:** On the first launch, the app will request your root password. This is required to configure the `uinput` drivers so Linux can create the virtual Xbox controller.
 
-### 🪟 Windows
-Download the `.exe` from the Releases page. 
-Windows now features **full, native Xbox 360 controller emulation** powered by `vgamepad` out of the box!
+#### 🍏 macOS Setup
+1. Download the `.dmg` file.
+2. Open the `.dmg` and drag the PSP Controller app into your Applications folder.
+3. Because macOS uses Keyboard emulation, you may need to grant the app **Accessibility** permissions in `System Settings > Privacy & Security > Accessibility`.
 
-### 🍏 macOS
-Download the `.dmg` from the Releases page.
-> **Warning:** Due to strict OS driver limitations, Xbox hardware emulation is currently not supported on macOS. Only the **Keyboard/Mouse** functionality will work out-of-the-box on this platform.
+### Step 2: Connect Your Phone
 
-### 📱 Android (Optional, but Awesome!)
-While you can just use your phone's web browser, we also provide a native Android app!
-1. Download the `psp-controller-android.apk` from the Releases page.
-2. Install it on your Android device. 
-3. The native app locks your screen orientation and hides the browser address bar for a much better full-screen gaming experience!
+1. **Start the Host**: Keep the PSP Controller app open on your PC. It will display a prominent IP address (e.g., `http://192.168.1.5:8080`).
+2. **Ensure Same Network**: Make sure your phone and PC are connected to the exact same Wi-Fi network.
+3. **Connect**: 
+   - **Option A (Web Browser)**: Open Chrome or Safari on your phone and type in the IP address displayed on your PC screen.
+   - **Option B (Native Android App)**: Download the `psp-controller-android.apk` from the Releases page, install it, open it, and type the IP address into the Settings menu. The native app hides the browser address bar and locks orientation for a true full-screen experience!
 
----
+### Step 3: Play and Customize!
 
-## 📖 Usage Guide
+Once connected, your phone screen will light up with the gamepad interface. You can immediately start controlling your PC.
 
-1. **Start the Host**: Open the PSP Controller app on your PC. It will display an IP address (e.g., `http://192.168.1.5:8080`).
-2. **Connect your Phone**: Make sure your phone and PC are on the same Wi-Fi network. Open that IP address in your phone's browser, OR open the installed Android APK and type the IP address into the settings.
-3. **Play**: Your phone is now a controller!
-
-### ⚙️ Settings & Customization
-Tap the **Settings (Gear Icon)** in the top right corner of the mobile interface to:
-- Enter your PC's IP Address (if using the APK).
-- Change the gamepad visual theme.
-- Toggle Haptic Feedback on/off.
-- Adjust the Gyroscope Sensitivity slider.
-
-Tap the **Edit Layout** button in the top bar to enter edit mode. You can drag buttons around and use two fingers to pinch and scale them. Tap "Save Layout" when you're done!
+- **Customize Layout**: Tap the **Edit Layout** button in the top bar to enter edit mode. You can drag buttons around to suit your fingers. Use two fingers to pinch/zoom and resize buttons. Tap "Save Layout" when done.
+- **Settings**: Tap the **Gear Icon** in the top right to change Themes, toggle Haptics, or adjust Gyroscope sensitivity.
 
 ---
 
