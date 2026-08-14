@@ -1,6 +1,6 @@
 {
   "name": "psp-controller",
-  "version": "0.0.11",
+  "version": "0.0.8",
   "description": "PSP Controller App",
   "author": "pdev <pdev@example.com>",
   "main": "main.js",
