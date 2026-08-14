@@ -3,6 +3,7 @@
   "version": "0.0.8",
   "description": "PSP Controller App",
   "author": "pdev <pdev@example.com>",
+  "license": "GPL-3.0",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
