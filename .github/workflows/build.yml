@@ -32,10 +32,10 @@ jobs:
             arch: x64
             target: win
             builder-args: "--win nsis --x64"
-          - os: macos-latest
-            arch: universal
+          - os: macos-13
+            arch: x64
             target: mac
-            builder-args: "--mac dmg --universal"
+            builder-args: "--mac dmg --x64"
           - os: macos-latest
             arch: arm64
             target: mac
