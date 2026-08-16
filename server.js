@@ -77,6 +77,7 @@ const handleWsConnection = (ws) => {
                         const binaryPath = path.join(baseDir, 'dist', binaryName);
                         
                         joystickProc = spawn(binaryPath, []);
+                        joystickProc.on('error', (err) => console.error(`Joystick spawn error:`, err));
                         joystickProc.stderr.on('data', (d) => console.error(`Joystick [PID ${joystickProc.pid}] Error: ${d}`));
                         joystickProc.on('close', (c) => console.log(`Joystick [PID ${joystickProc.pid}] exited with code ${c}`));
                         
