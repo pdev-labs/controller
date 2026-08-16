@@ -80,31 +80,9 @@ Once connected, your phone screen will light up with the gamepad interface. You 
 
 ## 🛠 Compiling from Source
 
-Want to build it yourself? 
+Want to build it yourself or compile it for a specific architecture (x64, arm64) on Linux, Windows, macOS, or Android?
 
-**Prerequisites:**
-- Node.js (v18+)
-- Python 3.10+
-- `pip install evdev` (Linux), `vgamepad` (Windows), `pynput` (All OS)
-
-**Steps:**
-```bash
-# Clone the repo
-git clone https://github.com/pdev-labs/controller.git
-cd controller
-
-# Install NPM dependencies
-npm install
-
-# Build the Python Joystick Engine
-pyinstaller --onefile virtual_joystick.py
-
-# Run in development mode
-npm start
-
-# Build production binaries (AppImage, deb, exe, dmg)
-npx electron-builder --linux AppImage deb --x64
-```
+Please see our comprehensive [Building from Source Guide](BUILDING.md) for detailed, step-by-step instructions.
 
 ---
 
