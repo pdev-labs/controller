@@ -31,6 +31,11 @@ function getLocalIp() {
 }
 
 function checkPermissionsAndStart(win) {
+    if (process.platform !== 'linux') {
+        startServer(win);
+        return;
+    }
+
     const uinputPath = '/dev/uinput';
     const fs = require('fs');
     try {
