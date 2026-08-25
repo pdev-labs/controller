@@ -145,7 +145,10 @@ if (apkIpContainer && apkIpInput) {
     }
 }
 
+let isConnecting = false;
 connectBtn.addEventListener('click', () => {
+    if (isConnecting) return;
+    
     if (apkIpInput) {
         const ip = apkIpInput.value.trim();
         if (!ip) {
@@ -154,7 +157,37 @@ connectBtn.addEventListener('click', () => {
         }
         localStorage.setItem('pc-ip', ip);
     }
+    
+    const originalText = connectBtn.innerText;
+    connectBtn.innerText = 'Connecting...';
+    connectBtn.disabled = true;
+    isConnecting = true;
+    
+    // Safety timeout in case websocket hangs
+    const timeout = setTimeout(() => {
+        if (ws && ws.readyState !== WebSocket.OPEN) {
+            connectBtn.innerText = originalText;
+            connectBtn.disabled = false;
+            isConnecting = false;
+            showCustomAlert('Connection timed out. Check PC firewall.');
+        }
+    }, 4000);
+    
     connectWebSocket();
+    
+    // We can't perfectly hook into ws.onerror from here easily because ws is reassigned globally,
+    // so we just rely on the onopen or the safety timeout.
+    
+    // Poll for success to reset button
+    const checkInterval = setInterval(() => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            clearInterval(checkInterval);
+            clearTimeout(timeout);
+            connectBtn.innerText = originalText;
+            connectBtn.disabled = false;
+            isConnecting = false;
+        }
+    }, 500);
 });
 
 // QR Code Scanner Logic
@@ -340,15 +373,21 @@ if (autoDetectBtn) {
                     setTimeout(() => {
                         if (found) return;
                         const ip = subnet + i;
-                        fetch(`http://${ip}:3000/ping`, { signal: AbortSignal.timeout(3000) })
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 3000);
+                        
+                        fetch(`http://${ip}:3000/ping`, { signal: controller.signal })
                         .then(r => r.text())
                         .then(t => {
+                            clearTimeout(timeoutId);
                             if (t === 'psp-controller' && !found) {
                                 found = true;
                                 resolve(ip);
                             }
                         })
-                        .catch(() => {})
+                        .catch(() => {
+                            clearTimeout(timeoutId);
+                        })
                         .finally(() => {
                             pending--;
                             if (pending === 0 && !found) {
