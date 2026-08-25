@@ -62,6 +62,11 @@ if (btn2x) {
     });
 }
 // ----------------------------
+// Polyfill for NodeList.prototype.forEach on older WebViews
+if (window.NodeList && !NodeList.prototype.forEach) {
+    NodeList.prototype.forEach = Array.prototype.forEach;
+}
+
 const overlay = document.getElementById('overlay');
 const connectBtn = document.getElementById('connect-btn');
 const statusDot = document.getElementById('connection-status');
@@ -824,11 +829,19 @@ if (cycleModeBtn && launchModeBtn) {
     });
 
     launchModeBtn.addEventListener('click', () => {
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen().catch(err => console.log(err));
+        try {
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen().catch(err => console.log(err));
+            }
+        } catch (e) {
+            console.error("Fullscreen error:", e);
         }
         
-        setOrientation('landscape');
+        try {
+            setOrientation('landscape');
+        } catch (e) {
+            console.error("Orientation error:", e);
+        }
         
         overlay.style.display = 'none';
         
