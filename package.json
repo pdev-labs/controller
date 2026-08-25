@@ -17,6 +17,7 @@
     "@capacitor/core": "^8.5.0",
     "@capacitor/screen-orientation": "^8.0.1",
     "@capacitor/status-bar": "^8.0.3",
+    "@lidoravitan/capacitor-web-socket-server": "^1.0.0",
     "cordova": "^13.0.0",
     "cordova-plugin-networkinterface": "^2.2.0",
     "express": "^5.2.1",

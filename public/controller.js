@@ -210,6 +210,89 @@ if (cancelQrBtn) {
     });
 }
 
+// Receiver Mode Logic (Android APK Only)
+const receiverModeBtn = document.getElementById('apk-receiver-mode-btn');
+const receiverUi = document.getElementById('receiver-ui');
+const apkIpContainerElem = document.getElementById('apk-ip-container');
+const receiverQrImg = document.getElementById('receiver-qr-img');
+const receiverPinDisplay = document.getElementById('receiver-pin-display');
+const receiverStatus = document.getElementById('receiver-status');
+const receiverStopBtn = document.getElementById('receiver-stop-btn');
+
+let capacitorWsPlugin = null;
+
+if (receiverModeBtn) {
+    receiverModeBtn.addEventListener('click', async () => {
+        if (!window.Capacitor) {
+            alert('Receiver Mode is only available in the native Android App!');
+            return;
+        }
+
+        apkIpContainerElem.style.display = 'none';
+        receiverUi.style.display = 'block';
+        receiverStatus.innerText = 'Initializing...';
+
+        try {
+            capacitorWsPlugin = window.Capacitor.Plugins.WebSocketServerPlugin;
+            
+            // Get IP
+            const ipInfo = await new Promise((resolve, reject) => {
+                networkinterface.getWiFiIPAddress(resolve, reject);
+            });
+            const ip = ipInfo.ip;
+
+            // Generate PIN
+            const pin = Math.floor(1000 + Math.random() * 9000).toString();
+            receiverPinDisplay.innerText = pin;
+            
+            const wsUrl = `ws://${ip}:3000`;
+            receiverQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(wsUrl)}`;
+
+            await capacitorWsPlugin.connect({ port: 3000 });
+            
+            capacitorWsPlugin.addListener('clientConnect', () => {
+                receiverStatus.innerText = 'Controller connected! Waiting for PIN...';
+            });
+            
+            capacitorWsPlugin.addListener('message', async (data) => {
+                try {
+                    const msg = JSON.parse(data.message);
+                    if (msg.type === 'auth') {
+                        if (msg.pin === pin) {
+                            receiverStatus.innerText = 'Controller Authenticated!';
+                            await capacitorWsPlugin.send({ clientId: data.clientId, message: JSON.stringify({ type: 'auth_success' }) });
+                        } else {
+                            await capacitorWsPlugin.send({ clientId: data.clientId, message: JSON.stringify({ type: 'auth_fail' }) });
+                        }
+                    } else if (msg.type === 'ping') {
+                        await capacitorWsPlugin.send({ clientId: data.clientId, message: JSON.stringify({ type: 'pong' }) });
+                    }
+                } catch(e) {}
+            });
+            
+            capacitorWsPlugin.addListener('clientDisconnect', () => {
+                receiverStatus.innerText = 'Controller disconnected. Waiting...';
+            });
+
+            receiverStatus.innerText = `Waiting for controller... (${ip})`;
+        } catch (err) {
+            receiverStatus.innerText = 'Failed to start Receiver: ' + err.message;
+        }
+    });
+}
+
+if (receiverStopBtn) {
+    receiverStopBtn.addEventListener('click', async () => {
+        if (capacitorWsPlugin) {
+            try {
+                await capacitorWsPlugin.disconnect();
+                await capacitorWsPlugin.removeListeners();
+            } catch(e) {}
+        }
+        receiverUi.style.display = 'none';
+        apkIpContainerElem.style.display = 'block';
+    });
+}
 // Auto-Detect Logic
 const autoDetectBtn = document.getElementById('auto-detect-btn');
 if (autoDetectBtn) {

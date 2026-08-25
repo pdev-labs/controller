@@ -222,14 +222,31 @@
                 <h3>Connect to PC</h3>
                 <p>Select a method to connect to the PC Host.</p>
                 
-                <div id="apk-ip-container" class="connection-methods">
-                    <button id="scan-qr-btn" class="pill-btn secondary">Scan QR Code</button>
-                    <button id="auto-detect-btn" class="pill-btn secondary">Auto Detect</button>
-                    <div class="manual-entry">
-                        <input type="text" id="apk-ip-input" placeholder="e.g. 192.168.1.5">
-                        <button id="connect-btn" class="pill-btn primary" style="width: auto;">Connect</button>
+                <div class="apk-ip-container" id="apk-ip-container">
+                    <input type="text" id="apk-ip-input" placeholder="Enter PC IP (e.g. 192.168.1.5)">
+                    <button id="apk-ip-connect-btn">Connect manually</button>
+                    <div style="margin: 15px 0; color: #888; display: flex; align-items: center;">
+                        <hr style="flex:1; border: none; border-top: 1px solid #333;"><span style="padding: 0 10px;">OR</span><hr style="flex:1; border: none; border-top: 1px solid #333;">
                     </div>
+                    <button id="apk-qr-btn" style="background: #2196F3;"><span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 5px;">qr_code_scanner</span> Scan QR Code</button>
+                    <button id="apk-auto-detect-btn" style="background: #9c27b0; margin-top: 10px;"><span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 5px;">radar</span> Auto Detect</button>
+                    
+                    <div style="margin: 15px 0; color: #888; display: flex; align-items: center;">
+                        <hr style="flex:1; border: none; border-top: 1px solid #333;"><span style="padding: 0 10px;">HOST</span><hr style="flex:1; border: none; border-top: 1px solid #333;">
+                    </div>
+                    <button id="apk-receiver-mode-btn" style="background: #FF9800; color: black;"><span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 5px;">cast</span> Start Receiver Mode</button>
                 </div>
+            </div>
+
+            <div id="receiver-ui" style="display: none; text-align: center; color: white;">
+                <h2>Receiver Mode Active</h2>
+                <p>Scan this QR code with the other phone</p>
+                <img id="receiver-qr-img" src="" style="width: 200px; height: 200px; margin: 10px auto; display: block; border: 4px solid white; border-radius: 8px;">
+                <p style="font-size: 1.2rem; color: #aaa;">PIN Code for connection:</p>
+                <div id="receiver-pin-display" style="font-size: 3rem; font-weight: bold; letter-spacing: 5px; color: #4CAF50; margin-bottom: 20px;">----</div>
+                <div id="receiver-status" style="color: #ff9800; font-weight: bold;">Waiting for controller...</div>
+                <button id="receiver-stop-btn" style="background: #f44336; padding: 10px 20px; font-size: 1rem; border: none; border-radius: 5px; margin-top: 20px; color: white; font-weight: bold; cursor: pointer;">Stop Receiver</button>
+            </div>
 
                 <div id="qr-reader-container" style="display: none; flex-direction: column; align-items: center; width: 100%;">
                     <div id="qr-reader" style="width: 250px; border-radius: 12px; overflow: hidden; background: #000;"></div>

@@ -7,3 +7,6 @@ project(':capacitor-screen-orientation').projectDir = new File('../node_modules/
 
 include ':capacitor-status-bar'
 project(':capacitor-status-bar').projectDir = new File('../node_modules/@capacitor/status-bar/android')
+
+include ':lidoravitan-capacitor-web-socket-server'
+project(':lidoravitan-capacitor-web-socket-server').projectDir = new File('../node_modules/@lidoravitan/capacitor-web-socket-server/android')
