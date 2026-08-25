@@ -413,11 +413,13 @@ function showPinModal(hasError = false) {
         }, 2000);
     }
     pinModal.classList.remove('hidden');
-    pinInput.focus();
+    // Disabled programmatic focus to prevent the Android keyboard from forcefully opening in a loop
+    // pinInput.focus(); 
 }
 
 function hidePinModal() {
     pinModal.classList.add('hidden');
+    pinInput.blur(); // Ensure keyboard closes
 }
 
 if (pinSubmit) {
