@@ -498,6 +498,12 @@ function connectWebSocket() {
                     el.textContent = '[online]';
                     el.style.color = '#4CAF50';
                 });
+
+                // Auto-launch gamepad
+                const launchBtn = document.getElementById('launch-mode-btn');
+                if (launchBtn) {
+                    launchBtn.click();
+                }
             }
         } catch(e) {}
     };
