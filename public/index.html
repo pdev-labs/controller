@@ -222,19 +222,18 @@
                 <h3>Connect to PC</h3>
                 <p>Select a method to connect to the PC Host.</p>
                 
-                <div class="apk-ip-container" id="apk-ip-container">
-                    <input type="text" id="apk-ip-input" placeholder="Enter PC IP (e.g. 192.168.1.5)">
-                    <button id="apk-ip-connect-btn">Connect manually</button>
-                    <div style="margin: 15px 0; color: #888; display: flex; align-items: center;">
-                        <hr style="flex:1; border: none; border-top: 1px solid #333;"><span style="padding: 0 10px;">OR</span><hr style="flex:1; border: none; border-top: 1px solid #333;">
+                <div id="apk-ip-container" class="connection-methods">
+                    <button id="scan-qr-btn" class="pill-btn secondary">Scan QR Code</button>
+                    <button id="auto-detect-btn" class="pill-btn secondary">Auto Detect</button>
+                    <div class="manual-entry">
+                        <input type="text" id="apk-ip-input" placeholder="e.g. 192.168.1.5">
+                        <button id="connect-btn" class="pill-btn primary" style="width: auto;">Connect</button>
                     </div>
-                    <button id="apk-qr-btn" style="background: #2196F3;"><span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 5px;">qr_code_scanner</span> Scan QR Code</button>
-                    <button id="apk-auto-detect-btn" style="background: #9c27b0; margin-top: 10px;"><span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 5px;">radar</span> Auto Detect</button>
                     
-                    <div style="margin: 15px 0; color: #888; display: flex; align-items: center;">
-                        <hr style="flex:1; border: none; border-top: 1px solid #333;"><span style="padding: 0 10px;">HOST</span><hr style="flex:1; border: none; border-top: 1px solid #333;">
+                    <div style="margin: 15px 0; color: #888; display: flex; align-items: center; width: 100%;">
+                        <hr style="flex:1; border: none; border-top: 1px solid #444;"><span style="padding: 0 10px; font-size: 0.9rem;">HOST OPTIONS</span><hr style="flex:1; border: none; border-top: 1px solid #444;">
                     </div>
-                    <button id="apk-receiver-mode-btn" style="background: #FF9800; color: black;"><span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 5px;">cast</span> Start Receiver Mode</button>
+                    <button id="apk-receiver-mode-btn" class="pill-btn primary" style="background: #FF9800; color: #000; border: none;">Start Receiver Mode</button>
                 </div>
             </div>
 
