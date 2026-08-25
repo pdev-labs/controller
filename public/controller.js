@@ -233,13 +233,22 @@ if (receiverModeBtn) {
         receiverStatus.innerText = 'Initializing...';
 
         try {
-            capacitorWsPlugin = window.Capacitor.Plugins.WebSocketServerPlugin;
+            capacitorWsPlugin = window.Capacitor.Plugins.WebSocketServer;
             
-            // Get IP
-            const ipInfo = await new Promise((resolve, reject) => {
-                networkinterface.getWiFiIPAddress(resolve, reject);
-            });
-            const ip = ipInfo.ip;
+            // Get IP with fallback for Hotspot mode
+            let ip = '127.0.0.1';
+            try {
+                if (window.networkinterface) {
+                    const ipInfo = await new Promise((resolve, reject) => {
+                        networkinterface.getWiFiIPAddress(resolve, reject);
+                    }).catch(() => new Promise((resolve, reject) => {
+                        networkinterface.getIPAddress(resolve, reject);
+                    }));
+                    if (ipInfo && ipInfo.ip) ip = ipInfo.ip;
+                }
+            } catch (e) {
+                console.log("Could not get IP automatically");
+            }
 
             // Generate PIN
             const pin = Math.floor(1000 + Math.random() * 9000).toString();
@@ -276,7 +285,7 @@ if (receiverModeBtn) {
 
             receiverStatus.innerText = `Waiting for controller... (${ip})`;
         } catch (err) {
-            receiverStatus.innerText = 'Failed to start Receiver: ' + err.message;
+            receiverStatus.innerText = 'Failed to start Receiver: ' + (err.message || err);
         }
     });
 }
