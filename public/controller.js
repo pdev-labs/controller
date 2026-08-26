@@ -259,16 +259,48 @@ const receiverStopBtn = document.getElementById('receiver-stop-btn');
 
 let capacitorWsPlugin = null;
 
+const isElectron = typeof require !== 'undefined' && typeof process !== 'undefined' && process.versions && process.versions.electron;
+let electronServerInfo = null;
+let electronServerPin = null;
+
+if (isElectron) {
+    const { ipcRenderer } = require('electron');
+    ipcRenderer.on('server-info', (event, data) => {
+        electronServerInfo = data;
+        const qrImg = document.getElementById('receiver-qr-img');
+        const status = document.getElementById('receiver-status');
+        if (qrImg && data.qrDataUrl) qrImg.src = data.qrDataUrl;
+        if (status) status.innerText = 'Ready to connect (PC Host)';
+    });
+    ipcRenderer.on('server-pin', (event, pin) => {
+        electronServerPin = pin;
+        const pinDisplay = document.getElementById('receiver-pin-display');
+        if (pinDisplay) pinDisplay.innerText = pin;
+    });
+}
+
 if (receiverModeBtn) {
+    receiverModeBtn.innerText = "Host Receiver Mode"; // Update button text
     receiverModeBtn.addEventListener('click', async () => {
-        if (!window.Capacitor) {
-            alert('Receiver Mode is only available in the native Android App!');
+        if (!window.Capacitor && !isElectron) {
+            alert('Host Receiver Mode is only available in the native Android App or Desktop App!');
             return;
         }
 
         apkIpContainerElem.style.display = 'none';
         receiverUi.style.display = 'block';
         receiverStatus.innerText = 'Initializing...';
+
+        if (isElectron) {
+            if (electronServerInfo) {
+                receiverQrImg.src = electronServerInfo.qrDataUrl;
+                receiverStatus.innerText = 'Ready to connect (PC Host)';
+            }
+            if (electronServerPin) {
+                receiverPinDisplay.innerText = electronServerPin;
+            }
+            return; // Desktop uses the background Node.js server, so skip Capacitor logic
+        }
 
         try {
             capacitorWsPlugin = window.Capacitor.Plugins.WebSocketServer;
@@ -313,6 +345,15 @@ if (receiverModeBtn) {
                         }
                     } else if (msg.type === 'ping') {
                         await capacitorWsPlugin.send({ clientId: data.clientId, message: JSON.stringify({ type: 'pong' }) });
+                    } else if (msg.type === 'button') {
+                        if (window.AndroidNative && window.AndroidNative.injectButton) {
+                            window.AndroidNative.injectButton(msg.button, msg.status === 'pressed');
+                        }
+                    } else if (msg.type === 'axis' || msg.type === 'gyro') {
+                        if (window.AndroidNative && window.AndroidNative.injectAxis) {
+                            if (msg.x !== undefined) window.AndroidNative.injectAxis(msg.type + '_x', msg.x);
+                            if (msg.y !== undefined) window.AndroidNative.injectAxis(msg.type + '_y', msg.y);
+                        }
                     }
                 } catch(e) {}
             });

@@ -42,6 +42,18 @@ public class MainActivity extends BridgeActivity {
                     hideSystemUI();
                 });
             }
+            
+            @JavascriptInterface
+            public void injectButton(String button, boolean isPressed) {
+                // Stub for Shizuku Gamepad Injection
+                System.out.println("Shizuku Stub - Button: " + button + " Pressed: " + isPressed);
+            }
+            
+            @JavascriptInterface
+            public void injectAxis(String axis, float value) {
+                // Stub for Shizuku Gamepad Injection
+                System.out.println("Shizuku Stub - Axis: " + axis + " Value: " + value);
+            }
         }, "AndroidNative");
     }
 

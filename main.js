@@ -133,7 +133,7 @@ function createWindow() {
         backgroundColor: "#1a1a1a"
     });
 
-    win.loadFile('gui.html');
+    win.loadFile(path.join(__dirname, 'public', 'index.html'));
     checkPermissionsAndStart(win);
 }
 
