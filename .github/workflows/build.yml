@@ -2,7 +2,7 @@ name: Build Multi-OS Controller
 
 on:
   push:
-    branches: [ main ]
+    branches: [ "main", "feature" ]
     paths-ignore:
       - '**.md'
     tags:
