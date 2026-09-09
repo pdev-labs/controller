@@ -299,8 +299,28 @@ if (receiverModeBtn) {
             if (electronServerPin) {
                 receiverPinDisplay.innerText = electronServerPin;
             }
+            document.getElementById('receiver-engine-select').parentElement.style.display = 'none'; // Not needed on PC
             return; // Desktop uses the background Node.js server, so skip Capacitor logic
         }
+
+        const engineSelect = document.getElementById('receiver-engine-select');
+        const openMapperBtn = document.getElementById('open-touch-mapper-btn');
+        
+        engineSelect.addEventListener('change', (e) => {
+            if (e.target.value === 'accessibility') {
+                openMapperBtn.style.display = 'block';
+            } else {
+                openMapperBtn.style.display = 'none';
+            }
+        });
+        
+        openMapperBtn.addEventListener('click', () => {
+            if (window.AndroidNative && window.AndroidNative.openTouchMapper) {
+                window.AndroidNative.openTouchMapper();
+            } else {
+                alert('Touch Mapper is only supported on the native Android App.');
+            }
+        });
 
         try {
             capacitorWsPlugin = window.Capacitor.Plugins.WebSocketServer;

@@ -240,12 +240,20 @@
             <!-- Receiver UI Mode -->
             <div id="receiver-ui" class="connection-methods" style="display: none; text-align: center;">
                 <h2>Host Receiver Active</h2>
+                <div style="margin-bottom: 20px;">
+                    <label style="color: #ccc; margin-right: 10px;">Injection Engine:</label>
+                    <select id="receiver-engine-select" style="padding: 5px; background: #333; color: white; border: 1px solid #555; border-radius: 4px;">
+                        <option value="shizuku">Shizuku (Native Gamepad)</option>
+                        <option value="accessibility">Touch Mapper (Accessibility)</option>
+                    </select>
+                </div>
+                <button id="open-touch-mapper-btn" class="pill-btn primary" style="background: #2196F3; color: white; border: none; display: none; margin: 0 auto 20px auto;">Open Touch Mapper Overlay</button>
                 <p>Scan this QR code with the other phone</p>
                 <img id="receiver-qr-img" src="" style="width: 200px; height: 200px; margin: 10px auto; display: block; border: 4px solid white; border-radius: 8px;">
                 <p style="font-size: 1.2rem; color: #aaa;">PIN Code for connection:</p>
-                <div id="receiver-pin-display" style="font-size: 3rem; font-weight: bold; letter-spacing: 5px; color: #4CAF50; margin-bottom: 20px;">----</div>
-                <div id="receiver-status" style="color: #ff9800; font-weight: bold;">Waiting for controller...</div>
-                <button id="receiver-stop-btn" style="background: #f44336; padding: 10px 20px; font-size: 1rem; border: none; border-radius: 5px; margin-top: 20px; color: white; font-weight: bold; cursor: pointer;">Stop Receiver</button>
+                <div id="receiver-pin-display" style="font-size: 3rem; letter-spacing: 15px; font-weight: bold; color: var(--md-primary); margin-bottom: 20px;">----</div>
+                <div id="receiver-status" style="color: var(--md-on-surface); margin-bottom: 20px;">Waiting...</div>
+                <button id="receiver-stop-btn" class="pill-btn primary" style="background: #f44336; border: none; color: white;">Stop Receiver</button>
             </div>
 
                 <div id="qr-reader-container" style="display: none; flex-direction: column; align-items: center; width: 100%;">

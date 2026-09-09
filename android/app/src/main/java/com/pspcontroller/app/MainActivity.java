@@ -44,15 +44,35 @@ public class MainActivity extends BridgeActivity {
             }
             
             @JavascriptInterface
+            public void openTouchMapper() {
+                runOnUiThread(() -> {
+                    if (!android.provider.Settings.canDrawOverlays(MainActivity.this)) {
+                        android.content.Intent intent = new android.content.Intent(
+                            android.provider.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                            android.net.Uri.parse("package:" + getPackageName())
+                        );
+                        startActivity(intent);
+                        return;
+                    }
+                    TouchOverlayManager.getInstance(MainActivity.this).showOverlay();
+                });
+            }
+            
+            @JavascriptInterface
             public void injectButton(String button, boolean isPressed) {
-                // Stub for Shizuku Gamepad Injection
-                System.out.println("Shizuku Stub - Button: " + button + " Pressed: " + isPressed);
+                if (isPressed && TouchMapperService.instance != null) {
+                    int[] coords = TouchOverlayManager.getInstance(MainActivity.this).getMappedCoordinates(button);
+                    if (coords != null) {
+                        TouchMapperService.instance.simulateTap(coords[0], coords[1]);
+                    }
+                }
             }
             
             @JavascriptInterface
             public void injectAxis(String axis, float value) {
-                // Stub for Shizuku Gamepad Injection
-                System.out.println("Shizuku Stub - Axis: " + axis + " Value: " + value);
+                if (TouchMapperService.instance != null) {
+                    TouchMapperService.instance.handleAxis(axis, value);
+                }
             }
         }, "AndroidNative");
     }

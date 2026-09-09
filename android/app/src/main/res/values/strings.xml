@@ -1,7 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">pspcontroller</string>
-    <string name="title_activity_main">pspcontroller</string>
+    <string name="app_name">PSP-Controller</string>
+    <string name="title_activity_main">PSP-Controller</string>
+    <string name="accessibility_service_description">Used for Touch Mapper functionality to simulate button presses</string>
     <string name="package_name">com.pspcontroller.app</string>
     <string name="custom_url_scheme">com.pspcontroller.app</string>
 </resources>
