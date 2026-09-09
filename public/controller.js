@@ -322,9 +322,11 @@ if (receiverModeBtn) {
             }
         });
 
+        window.onReceiverStatus = (statusText) => {
+            receiverStatus.innerText = statusText;
+        };
+
         try {
-            capacitorWsPlugin = window.Capacitor.Plugins.WebSocketServer;
-            
             // Get IP with fallback for Hotspot mode
             let ip = '127.0.0.1';
             try {
@@ -347,42 +349,11 @@ if (receiverModeBtn) {
             const wsUrl = `ws://${ip}:3000`;
             receiverQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(wsUrl)}`;
 
-            await capacitorWsPlugin.connect({ port: 3000 });
-            
-            capacitorWsPlugin.addListener('clientConnect', () => {
-                receiverStatus.innerText = 'Controller connected! Waiting for PIN...';
-            });
-            
-            capacitorWsPlugin.addListener('message', async (data) => {
-                try {
-                    const msg = JSON.parse(data.message);
-                    if (msg.type === 'auth') {
-                        if (msg.pin === pin) {
-                            receiverStatus.innerText = 'Controller Authenticated!';
-                            await capacitorWsPlugin.send({ clientId: data.clientId, message: JSON.stringify({ type: 'auth_success' }) });
-                        } else {
-                            await capacitorWsPlugin.send({ clientId: data.clientId, message: JSON.stringify({ type: 'auth_fail' }) });
-                        }
-                    } else if (msg.type === 'ping') {
-                        await capacitorWsPlugin.send({ clientId: data.clientId, message: JSON.stringify({ type: 'pong' }) });
-                    } else if (msg.type === 'button') {
-                        if (window.AndroidNative && window.AndroidNative.injectButton) {
-                            window.AndroidNative.injectButton(msg.button, msg.status === 'pressed');
-                        }
-                    } else if (msg.type === 'axis' || msg.type === 'gyro') {
-                        if (window.AndroidNative && window.AndroidNative.injectAxis) {
-                            if (msg.x !== undefined) window.AndroidNative.injectAxis(msg.type + '_x', msg.x);
-                            if (msg.y !== undefined) window.AndroidNative.injectAxis(msg.type + '_y', msg.y);
-                        }
-                    }
-                } catch(e) {}
-            });
-            
-            capacitorWsPlugin.addListener('clientDisconnect', () => {
-                receiverStatus.innerText = 'Controller disconnected. Waiting...';
-            });
-
-            receiverStatus.innerText = `Waiting for controller... (${ip})`;
+            if (window.AndroidNative && window.AndroidNative.startServer) {
+                window.AndroidNative.startServer(pin);
+            } else {
+                receiverStatus.innerText = 'Native WebSocket server not available.';
+            }
         } catch (err) {
             receiverStatus.innerText = 'Failed to start Receiver: ' + (err.message || err);
         }
@@ -391,14 +362,13 @@ if (receiverModeBtn) {
 
 if (receiverStopBtn) {
     receiverStopBtn.addEventListener('click', async () => {
-        if (capacitorWsPlugin) {
+        if (window.AndroidNative && window.AndroidNative.stopServer) {
             try {
-                await capacitorWsPlugin.disconnect();
-                await capacitorWsPlugin.removeListeners();
+                window.AndroidNative.stopServer();
             } catch(e) {}
         }
         receiverUi.style.display = 'none';
-        apkIpContainerElem.style.display = 'block';
+        apkIpContainerElem.style.display = 'flex';
     });
 }
 // Auto-Detect Logic

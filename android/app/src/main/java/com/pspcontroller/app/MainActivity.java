@@ -7,8 +7,16 @@ import android.view.View;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
 import com.getcapacitor.BridgeActivity;
+import org.java_websocket.server.WebSocketServer;
+import org.java_websocket.handshake.ClientHandshake;
+import org.java_websocket.WebSocket;
+import org.json.JSONObject;
+import java.net.InetSocketAddress;
 
 public class MainActivity extends BridgeActivity {
+    private AppWebSocketServer wsServer;
+    private String currentPin = "";
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,7 +82,97 @@ public class MainActivity extends BridgeActivity {
                     TouchMapperService.instance.handleAxis(axis, value);
                 }
             }
+
+            @JavascriptInterface
+            public void startServer(String pin) {
+                currentPin = pin;
+                if (wsServer != null) {
+                    try { wsServer.stop(); } catch (Exception e) {}
+                }
+                wsServer = new AppWebSocketServer(new InetSocketAddress(3000));
+                wsServer.start();
+                runOnUiThread(() -> {
+                    bridge.getWebView().evaluateJavascript("if(window.onReceiverStatus) window.onReceiverStatus('Server started on port 3000. Waiting for controller...');", null);
+                });
+            }
+
+            @JavascriptInterface
+            public void stopServer() {
+                if (wsServer != null) {
+                    try { wsServer.stop(); } catch (Exception e) {}
+                    wsServer = null;
+                }
+            }
         }, "AndroidNative");
+    }
+
+    private class AppWebSocketServer extends WebSocketServer {
+        public AppWebSocketServer(InetSocketAddress address) {
+            super(address);
+        }
+
+        @Override
+        public void onOpen(WebSocket conn, ClientHandshake handshake) {
+            runOnUiThread(() -> {
+                bridge.getWebView().evaluateJavascript("if(window.onReceiverStatus) window.onReceiverStatus('Controller connected! Waiting for PIN...');", null);
+            });
+        }
+
+        @Override
+        public void onClose(WebSocket conn, int code, String reason, boolean remote) {
+            runOnUiThread(() -> {
+                bridge.getWebView().evaluateJavascript("if(window.onReceiverStatus) window.onReceiverStatus('Controller disconnected. Waiting...');", null);
+            });
+        }
+
+        @Override
+        public void onMessage(WebSocket conn, String message) {
+            try {
+                JSONObject msg = new JSONObject(message);
+                String type = msg.optString("type");
+                
+                if ("auth".equals(type)) {
+                    if (currentPin.equals(msg.optString("pin"))) {
+                        conn.send("{\"type\":\"auth_success\"}");
+                        runOnUiThread(() -> {
+                            bridge.getWebView().evaluateJavascript("if(window.onReceiverStatus) window.onReceiverStatus('Controller Authenticated!');", null);
+                        });
+                    } else {
+                        conn.send("{\"type\":\"auth_fail\"}");
+                    }
+                } else if ("ping".equals(type)) {
+                    conn.send("{\"type\":\"pong\"}");
+                } else if ("button".equals(type)) {
+                    String button = msg.optString("button");
+                    boolean isPressed = "pressed".equals(msg.optString("status"));
+                    if (isPressed && TouchMapperService.instance != null) {
+                        int[] coords = TouchOverlayManager.getInstance(MainActivity.this).getMappedCoordinates(button);
+                        if (coords != null) {
+                            TouchMapperService.instance.simulateTap(coords[0], coords[1]);
+                        }
+                    }
+                } else if ("analog".equals(type) || "gyro".equals(type)) {
+                    if (TouchMapperService.instance != null) {
+                        if (msg.has("x")) TouchMapperService.instance.handleAxis(type + "_x", (float)msg.getDouble("x"));
+                        if (msg.has("y")) TouchMapperService.instance.handleAxis(type + "_y", (float)msg.getDouble("y"));
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onError(WebSocket conn, Exception ex) {
+            ex.printStackTrace();
+            runOnUiThread(() -> {
+                bridge.getWebView().evaluateJavascript("if(window.onReceiverStatus) window.onReceiverStatus('Server error: " + ex.getMessage() + "');", null);
+            });
+        }
+
+        @Override
+        public void onStart() {
+        }
     }
 
     @Override
