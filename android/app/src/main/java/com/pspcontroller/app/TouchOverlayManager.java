@@ -141,9 +141,22 @@ public class TouchOverlayManager {
     
     public int[] getMappedCoordinates(String buttonId) {
         SharedPreferences prefs = context.getSharedPreferences("touch_mapper", Context.MODE_PRIVATE);
-        int x = prefs.getInt(buttonId + "_x", -1);
-        int y = prefs.getInt(buttonId + "_y", -1);
-        if (x == -1 || y == -1) return null;
+        int defaultX = 200;
+        int defaultY = 300;
+        switch (buttonId) {
+            case "dpad-up": defaultX = 200; defaultY = 200; break;
+            case "dpad-down": defaultX = 200; defaultY = 400; break;
+            case "dpad-left": defaultX = 100; defaultY = 300; break;
+            case "dpad-right": defaultX = 300; defaultY = 300; break;
+            case "btn-cross": defaultX = 800; defaultY = 400; break;
+            case "btn-circle": defaultX = 900; defaultY = 300; break;
+            case "btn-square": defaultX = 700; defaultY = 300; break;
+            case "btn-triangle": defaultX = 800; defaultY = 200; break;
+            case "analog-center": defaultX = 200; defaultY = 600; break;
+        }
+        
+        int x = prefs.getInt(buttonId + "_x", defaultX);
+        int y = prefs.getInt(buttonId + "_y", defaultY);
         return new int[]{x + 75, y + 75}; // Return center of the 150x150 button
     }
 }

@@ -37,7 +37,7 @@ public class TouchMapperService extends AccessibilityService {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             Path clickPath = new Path();
             clickPath.moveTo(x, y);
-            GestureDescription.StrokeDescription stroke = new GestureDescription.StrokeDescription(clickPath, 0, 50);
+            GestureDescription.StrokeDescription stroke = new GestureDescription.StrokeDescription(clickPath, 0, 100);
             GestureDescription.Builder builder = new GestureDescription.Builder();
             builder.addStroke(stroke);
             dispatchGesture(builder.build(), null, null);
