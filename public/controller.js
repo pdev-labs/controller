@@ -555,7 +555,7 @@ function connectWebSocket() {
     ws.onmessage = (event) => {
         try {
             const data = JSON.parse(event.data);
-            if (data.type === 'auth_error') {
+            if (data.type === 'auth_error' || data.type === 'auth_fail') {
                 localStorage.removeItem('auth-pin');
                 showPinModal(true);
             } else if (data.type === 'auth_success') {
@@ -869,12 +869,16 @@ if (cycleModeBtn && launchModeBtn) {
         }
         
         try {
-            setOrientation('landscape');
-        } catch (e) {
-            console.error("Orientation error:", e);
-        }
+            if (activeMode === 'gamepad-mode') {
+                setOrientation('landscape');
+            } else {
+                setOrientation('portrait');
+            }
+        } catch(e) {}
         
         overlay.style.display = 'none';
+        const bottomBar = document.querySelector('.home-bottom-bar');
+        if (bottomBar) bottomBar.style.display = 'none';
         
         modeContainers.forEach(c => {
             if(c.id === activeMode) c.classList.remove('hidden');
@@ -913,6 +917,8 @@ document.getElementById('cycle-mode-keyboard')?.addEventListener('click', () => 
 
 function closeToHome() {
     overlay.style.display = 'flex';
+    const bottomBar = document.querySelector('.home-bottom-bar');
+    if (bottomBar) bottomBar.style.display = 'flex';
     setOrientation('portrait');
 }
 if (closeGamepadBtn) closeGamepadBtn.addEventListener('click', closeToHome);
