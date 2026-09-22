@@ -29,8 +29,7 @@ public final class ShizukuHelper {
 
     // ---------- Shizuku ----------
 
-    /** True when the Shizuku binder service is reachable (Shizuku started). */
-    public static boolean isBinderAlive() {
+    /** True when the Shizuku binder service is reachable (Shizuku started). */    public static boolean isBinderAlive() {
         try {
             return Shizuku.pingBinder();
         } catch (Exception e) {
@@ -55,6 +54,28 @@ public final class ShizukuHelper {
         } catch (PackageManager.NameNotFoundException e) {
             return false;
         }
+    }
+
+    /**
+     * Single authoritative state, binder-first: on some devices package
+     * visibility stays blocked (dual apps, work profiles, OEM quirks) even
+     * with &lt;queries&gt;, but a live binder proves Shizuku is present.
+     * One of: "authorized", "running", "installed", "missing".
+     */
+    public static String getState(Context ctx) {
+        try {
+            if (isAuthorized()) return "authorized";
+        } catch (Exception ignored) {
+        }
+        try {
+            if (isBinderAlive()) return "running";
+        } catch (Exception ignored) {
+        }
+        try {
+            if (isShizukuInstalled(ctx)) return "installed";
+        } catch (Exception ignored) {
+        }
+        return "missing";
     }
 
     /** Requests Shizuku authorization (shows up in Shizuku's Authorized apps). */

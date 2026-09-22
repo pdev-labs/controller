@@ -438,17 +438,29 @@ function refreshReceiverSetup() {
         console.log('a11y status check failed:', e);
     }
     try {
-        const installed = window.AndroidNative.isShizukuInstalled
-            ? window.AndroidNative.isShizukuInstalled() : false;
-        const running = installed && window.AndroidNative.isShizukuRunning
-            ? window.AndroidNative.isShizukuRunning() : false;
-        const authed = running && window.AndroidNative.isShizukuAuthorized
-            ? window.AndroidNative.isShizukuAuthorized() : false;
-        if (authed) setSetupLabel(setupShizukuStatus, 'Authorized', '#4CAF50');
-        else if (running) setSetupLabel(setupShizukuStatus, 'Needs authorization', '#FF9800');
-        else if (installed) setSetupLabel(setupShizukuStatus, 'Not running', '#FF9800');
-        else setSetupLabel(setupShizukuStatus, 'Not installed', '#f44336');
-        if (setupShizukuBtn) setupShizukuBtn.innerText = authed ? 'OK' : 'Setup';
+        let state = null;
+        if (window.AndroidNative.getShizukuState) {
+            state = window.AndroidNative.getShizukuState();
+        }
+        if (state === 'authorized') setSetupLabel(setupShizukuStatus, 'Authorized', '#4CAF50');
+        else if (state === 'running') setSetupLabel(setupShizukuStatus, 'Needs authorization', '#FF9800');
+        else if (state === 'installed') setSetupLabel(setupShizukuStatus, 'Not running', '#FF9800');
+        else if (state === 'missing') setSetupLabel(setupShizukuStatus, 'Not installed', '#f44336');
+        else {
+            // Fallback for old native builds without getShizukuState().
+            const installed = window.AndroidNative.isShizukuInstalled
+                ? window.AndroidNative.isShizukuInstalled() : false;
+            const running = installed && window.AndroidNative.isShizukuRunning
+                ? window.AndroidNative.isShizukuRunning() : false;
+            const authed = running && window.AndroidNative.isShizukuAuthorized
+                ? window.AndroidNative.isShizukuAuthorized() : false;
+            if (authed) setSetupLabel(setupShizukuStatus, 'Authorized', '#4CAF50');
+            else if (running) setSetupLabel(setupShizukuStatus, 'Needs authorization', '#FF9800');
+            else if (installed) setSetupLabel(setupShizukuStatus, 'Not running', '#FF9800');
+            else setSetupLabel(setupShizukuStatus, 'Not installed', '#f44336');
+            state = authed ? 'authorized' : running ? 'running' : installed ? 'installed' : 'missing';
+        }
+        if (setupShizukuBtn) setupShizukuBtn.innerText = state === 'authorized' ? 'OK' : 'Setup';
     } catch (e) {
         console.log('shizuku status check failed:', e);
     }
@@ -473,28 +485,30 @@ if (setupA11yBtn) {
 if (setupShizukuBtn) {
     setupShizukuBtn.addEventListener('click', () => {
         try {
-            if (window.AndroidNative.isShizukuAuthorized
-                && window.AndroidNative.isShizukuAuthorized()) {
+            const N = window.AndroidNative;
+            const state = N.getShizukuState ? N.getShizukuState() : null;
+            const authed = state ? state === 'authorized'
+                : (N.isShizukuAuthorized && N.isShizukuAuthorized());
+            if (authed) {
                 refreshReceiverSetup();
                 return;
             }
-            const installed = window.AndroidNative.isShizukuInstalled
-                ? window.AndroidNative.isShizukuInstalled() : false;
+            const running = state ? (state === 'running' || state === 'authorized')
+                : (N.isShizukuRunning && N.isShizukuRunning());
+            if (running) {
+                N.requestShizukuPermission();
+                return;
+            }
+            const installed = state ? state === 'installed'
+                : (N.isShizukuInstalled && N.isShizukuInstalled());
             if (!installed) {
                 showCustomAlert('Shizuku app is not installed. Install "Shizuku" (moe.shizuku.privileged.api) from GitHub or Play Store, start it, then tap Setup again.');
                 return;
             }
-            const running = window.AndroidNative.isShizukuRunning
-                ? window.AndroidNative.isShizukuRunning() : false;
-            if (!running) {
-                const opened = window.AndroidNative.openShizukuApp
-                    ? window.AndroidNative.openShizukuApp() : false;
-                showCustomAlert(opened
-                    ? 'Start Shizuku in its app (via Wireless debugging or rooted/adb method), then return here and tap Setup again to authorize.'
-                    : 'Shizuku is installed but not running. Open the Shizuku app and start it, then tap Setup again.');
-                return;
-            }
-            window.AndroidNative.requestShizukuPermission();
+            const opened = N.openShizukuApp ? N.openShizukuApp() : false;
+            showCustomAlert(opened
+                ? 'Start Shizuku in its app (via Wireless debugging or rooted/adb method), then return here and tap Setup again to authorize.'
+                : 'Shizuku is installed but not running. Open the Shizuku app and start it, then tap Setup again.');
         } catch (e) {
             console.log('shizuku setup failed:', e);
         }

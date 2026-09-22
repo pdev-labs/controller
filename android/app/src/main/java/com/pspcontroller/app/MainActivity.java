@@ -164,6 +164,12 @@ public class MainActivity extends BridgeActivity {
                 return ShizukuHelper.isAccessibilityEnabled(MainActivity.this);
             }
 
+            /** One of: authorized | running | installed | missing (binder-first). */
+            @JavascriptInterface
+            public String getShizukuState() {
+                return ShizukuHelper.getState(MainActivity.this);
+            }
+
             @JavascriptInterface
             public boolean isShizukuInstalled() {
                 return ShizukuHelper.isShizukuInstalled(MainActivity.this);
