@@ -1,8 +1,9 @@
 name: Build Android APK
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ "main", "feature" ]
+    branches: [ "main", "feature", "opencode" ]
     tags:
       - 'v*'
   pull_request:
