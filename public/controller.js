@@ -496,28 +496,26 @@ if (setupShizukuBtn) {
         try {
             const N = window.AndroidNative;
             const state = N.getShizukuState ? N.getShizukuState() : null;
-            const authed = state ? state === 'authorized'
-                : (N.isShizukuAuthorized && N.isShizukuAuthorized());
-            if (authed) {
-                refreshReceiverSetup();
-                return;
-            }
             const running = state ? (state === 'running' || state === 'authorized')
                 : (N.isShizukuRunning && N.isShizukuRunning());
-            if (running) {
-                N.requestShizukuPermission();
+            if (!running) {
+                const installed = state ? state === 'installed'
+                    : (N.isShizukuInstalled && N.isShizukuInstalled());
+                if (!installed) {
+                    showCustomAlert('Shizuku app is not installed. Install "Shizuku" (moe.shizuku.privileged.api) from GitHub or Play Store, start it, then tap Setup again.');
+                    return;
+                }
+                const opened = N.openShizukuApp ? N.openShizukuApp() : false;
+                showCustomAlert(opened
+                    ? 'Start Shizuku in its app (via Wireless debugging or rooted/adb method), then return here and tap Setup again to authorize.'
+                    : 'Shizuku is installed but not running. Open the Shizuku app and start it, then tap Setup again.');
                 return;
             }
-            const installed = state ? state === 'installed'
-                : (N.isShizukuInstalled && N.isShizukuInstalled());
-            if (!installed) {
-                showCustomAlert('Shizuku app is not installed. Install "Shizuku" (moe.shizuku.privileged.api) from GitHub or Play Store, start it, then tap Setup again.');
-                return;
-            }
-            const opened = N.openShizukuApp ? N.openShizukuApp() : false;
-            showCustomAlert(opened
-                ? 'Start Shizuku in its app (via Wireless debugging or rooted/adb method), then return here and tap Setup again to authorize.'
-                : 'Shizuku is installed but not running. Open the Shizuku app and start it, then tap Setup again.');
+            // Always run a fresh authorization round-trip: silent when Shizuku
+            // already decided, otherwise it shows the manager prompt (which is
+            // also what creates our entry in Shizuku's authorized-apps list).
+            // The result refreshes our cached flag truthfully.
+            N.requestShizukuPermission();
         } catch (e) {
             console.log('shizuku setup failed:', e);
         }
