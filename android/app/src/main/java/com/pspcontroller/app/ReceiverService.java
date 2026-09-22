@@ -254,6 +254,25 @@ public class ReceiverService extends Service {
                         if (msg.has("x")) TouchMapperService.instance.handleAxis(type + "_x", (float) msg.getDouble("x"));
                         if (msg.has("y")) TouchMapperService.instance.handleAxis(type + "_y", (float) msg.getDouble("y"));
                     }
+                } else if ("mouse_move".equals(type)) {
+                    if (TouchMapperService.instance != null) {
+                        TouchMapperService.instance.handleMouseMove(
+                                (float) msg.optDouble("dx", 0), (float) msg.optDouble("dy", 0));
+                    }
+                } else if ("mouse_click".equals(type)) {
+                    if (TouchMapperService.instance != null) {
+                        TouchMapperService.instance.handleMouseClick(
+                                msg.optString("btn"), msg.optInt("val", 0));
+                    }
+                } else if ("mouse_scroll".equals(type)) {
+                    if (TouchMapperService.instance != null) {
+                        TouchMapperService.instance.handleMouseScroll((float) msg.optDouble("dy", 0));
+                    }
+                } else if ("key".equals(type)) {
+                    if (TouchMapperService.instance != null) {
+                        TouchMapperService.instance.handleKey(
+                                msg.optString("code"), msg.optInt("val", 0));
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();

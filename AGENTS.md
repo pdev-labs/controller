@@ -10,7 +10,7 @@
 ## Ports, auth, protocol (README is stale here — trust code)
 - Ports are `PORT` (default `3000`) HTTP and `PORT+1` HTTPS, not 8080/8081. `main.js` displays `https://<lan-ip>:3001`.
 - WS runs on both servers. First message per connection must be `{type:'auth', pin}` where PIN is random per boot (`[AUTH] SERVER_PIN:` in server stdout, forwarded to renderer via `server-pin` IPC). Unauthed messages are dropped; failure returns `auth_error`.
-- Message types over WS/stdin: `button` (`BTN_*` evdev names + `dpad-*` special-cased, `btn-ff` → `KEY_TAB`), `analog`/`gyro` (floats -1..1), `mouse_move`/`mouse_scroll`/`mouse_click`, `key` (`KEY_*` evdev names). `server.js:buttonMap` + `virtual_joystick.py:process_command` define mapping.
+- Message types over WS/stdin: `button` (`BTN_*` evdev names + `dpad-*` special-cased, `btn-ff` → `KEY_TAB`), `analog`/`gyro` (floats -1..1), `mouse_move`/`mouse_scroll`/`mouse_click`, `key` (`KEY_*` evdev names). `server.js:buttonMap` + `virtual_joystick.py:process_command` define mapping. Android `ReceiverService` must handle every one of these (missing types are silently dropped — that already broke keyboard/trackpad once).
 
 ## Commands
 - `npm install` then `npm start` (`electron .`) for desktop dev. `node server.js` runs server standalone (needs `server.key`/`server.cert` in root, no Electron QR/PIN UI).

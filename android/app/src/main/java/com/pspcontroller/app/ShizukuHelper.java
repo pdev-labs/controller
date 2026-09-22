@@ -5,8 +5,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.view.KeyEvent;
+
+import java.lang.reflect.Method;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import rikka.shizuku.Shizuku;
 
@@ -146,6 +152,105 @@ public final class ShizukuHelper {
         launch.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         ctx.startActivity(launch);
         return true;
+    }
+
+    // ---------- Shizuku shell + key mapping (receiver keyboard) ----------
+
+    private static final ExecutorService SHELL_EXEC = Executors.newSingleThreadExecutor();
+
+    /**
+     * Runs a shell command with Shizuku privileges on a background thread.
+     * Uses reflection because newProcess is private in API v13 (deprecated,
+     * slated for removal in v14); falls back silently when unavailable.
+     */
+    public static void runShellAsync(String[] cmd) {
+        SHELL_EXEC.execute(() -> {
+            Object proc = null;
+            try {
+                Method m = Shizuku.class.getDeclaredMethod(
+                        "newProcess", String[].class, String[].class, String.class);
+                m.setAccessible(true);
+                proc = m.invoke(null, cmd, null, null);
+                if (proc instanceof Process) {
+                    Process p = (Process) proc;
+                    long deadline = SystemClock.uptimeMillis() + 5000;
+                    while (true) {
+                        try {
+                            p.exitValue();
+                            break;
+                        } catch (IllegalThreadStateException running) {
+                            if (SystemClock.uptimeMillis() > deadline) break;
+                            try {
+                                Thread.sleep(50);
+                            } catch (InterruptedException ie) {
+                                Thread.currentThread().interrupt();
+                                break;
+                            }
+                        }
+                    }
+                    try {
+                        p.destroy();
+                    } catch (Exception ignored) {
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    /**
+     * Maps controller evdev KEY_* codes to Android keycodes. Returns 0 when
+     * there is no Android equivalent (validated via keyCodeFromString).
+     */
+    public static int toAndroidKeyCode(String evdev) {
+        if (evdev == null || !evdev.startsWith("KEY_")) return 0;
+        String name = evdev.substring(4);
+        switch (name) {
+            case "EQUAL": name = "EQUALS"; break;
+            case "LEFTBRACE": name = "LEFT_BRACKET"; break;
+            case "RIGHTBRACE": name = "RIGHT_BRACKET"; break;
+            case "DOT": name = "PERIOD"; break;
+            case "KPDOT": name = "NUMPAD_DOT"; break;
+            case "CAPSLOCK": name = "CAPS_LOCK"; break;
+            case "LEFTCTRL": name = "CTRL_LEFT"; break;
+            case "RIGHTCTRL": name = "CTRL_RIGHT"; break;
+            case "LEFTSHIFT": name = "SHIFT_LEFT"; break;
+            case "RIGHTSHIFT": name = "SHIFT_RIGHT"; break;
+            case "LEFTALT": name = "ALT_LEFT"; break;
+            case "RIGHTALT": name = "ALT_RIGHT"; break;
+            case "LEFTMETA": name = "META_LEFT"; break;
+            case "RIGHTMETA": name = "META_RIGHT"; break;
+            case "COMPOSE": name = "MENU"; break;
+            case "UP": name = "DPAD_UP"; break;
+            case "DOWN": name = "DPAD_DOWN"; break;
+            case "LEFT": name = "DPAD_LEFT"; break;
+            case "RIGHT": name = "DPAD_RIGHT"; break;
+            case "BACKSPACE": name = "DEL"; break;
+            case "DELETE": name = "FORWARD_DEL"; break;
+            case "END": name = "MOVE_END"; break;
+            case "PAGEUP": name = "PAGE_UP"; break;
+            case "PAGEDOWN": name = "PAGE_DOWN"; break;
+            case "KPMINUS": name = "NUMPAD_SUBTRACT"; break;
+            case "KPPLUS": name = "NUMPAD_ADD"; break;
+            case "KPSLASH": name = "NUMPAD_DIVIDE"; break;
+            case "KPASTERISK": name = "NUMPAD_MULTIPLY"; break;
+            case "KPENTER": name = "NUMPAD_ENTER"; break;
+            case "NUMLOCK": name = "NUM_LOCK"; break;
+            case "SCROLLLOCK": name = "SCROLL_LOCK"; break;
+            case "PAUSE": name = "BREAK"; break;
+            case "ESC": name = "ESCAPE"; break;
+            default: break;
+        }
+        if (name.length() == 3 && name.startsWith("KP") && Character.isDigit(name.charAt(2))) {
+            name = "NUMPAD_" + name.charAt(2);
+        }
+        try {
+            int code = KeyEvent.keyCodeFromString("KEYCODE_" + name);
+            return code == KeyEvent.KEYCODE_UNKNOWN ? 0 : code;
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     // ---------- Accessibility ----------
