@@ -371,6 +371,26 @@ if (receiverStopBtn) {
         apkIpContainerElem.style.display = 'flex';
     });
 }
+
+// Restore receiver UI if the foreground service survived an app restart
+// (user pressed Home or swiped the app from recents and reopened it).
+(function restoreReceiverState() {
+    try {
+        if (window.AndroidNative && window.AndroidNative.isReceiverRunning
+            && window.AndroidNative.isReceiverRunning()) {
+            const pin = window.AndroidNative.getReceiverPin
+                ? window.AndroidNative.getReceiverPin() : '';
+            const status = window.AndroidNative.getReceiverStatus
+                ? window.AndroidNative.getReceiverStatus() : 'Server running in background';
+            if (receiverPinDisplay && pin) receiverPinDisplay.innerText = pin;
+            if (receiverStatus && status) receiverStatus.innerText = status;
+            if (apkIpContainerElem) apkIpContainerElem.style.display = 'none';
+            if (receiverUi) receiverUi.style.display = 'block';
+        }
+    } catch (e) {
+        console.log('Receiver restore check failed:', e);
+    }
+})();
 // Auto-Detect Logic
 const autoDetectBtn = document.getElementById('auto-detect-btn');
 if (autoDetectBtn) {
