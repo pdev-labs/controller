@@ -71,6 +71,12 @@
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!-- Required together with FOREGROUND_SERVICE_CONNECTED_DEVICE: Android
+         only grants the connectedDevice FGS type if the app also holds one of
+         CHANGE_WIFI_STATE / CHANGE_NETWORK_STATE / BLUETOOTH_CONNECT / etc.,
+         otherwise startForeground() throws SecurityException. -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />

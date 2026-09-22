@@ -19,6 +19,8 @@
 - Android: `npx cap sync android`, then `cd android && ./gradlew assembleDebug` (release needs keystore secrets per `.github/workflows/android.yml`; JDK 21, Node 22 in CI).
 
 ## Gotchas
+- Android `connectedDevice` FGS type requires BOTH `FOREGROUND_SERVICE_CONNECTED_DEVICE` AND one of `CHANGE_WIFI_STATE`/`CHANGE_NETWORK_STATE`/`BLUETOOTH_CONNECT`/etc. — missing the second throws `SecurityException` in `startForeground` (seen on targetSdk 36).
+- Shizuku needs BOTH `dev.rikka.shizuku:api` AND `dev.rikka.shizuku:provider` deps; missing `provider` = `ClassNotFoundException` crash on every launch.
 - Linux `/dev/uinput` needs `0666` via `setup.sh`/`install.sh` udev rule (`99-psp-uinput.rules`); `main.js` auto-tries `pkexec` on first launch. Don't `sudo npm start` as a workaround.
 - No test suite: `npm test` intentionally fails; `test.py` / `test_ws.js` / `test_gyro.py` / `test_vk.js` are manual smoke scripts needing real uinput/ViGEmBus or a live server — run individually, never as CI gate.
 - `public/` static serving sets `Cache-Control: no-store`; client still caches IP/PIN in `localStorage` (`pc-ip`, `auth-pin`).
