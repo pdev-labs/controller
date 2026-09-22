@@ -5,12 +5,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
-
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 
 import rikka.shizuku.Shizuku;
 
@@ -46,59 +42,31 @@ public final class ShizukuHelper {
         try {
             if (!isBinderAlive()) return false;
             if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) return false;
-            // The flag alone can lie (stale grants, Sui vs Shizuku mix-ups):
-            // prove it by running a trivial privileged command.
-            return probeShell();
+            // checkSelfPermission() caches its result in a static flag that is
+            // never cleared while our process lives (our foreground service
+            // keeps it alive indefinitely), so a revoked grant keeps showing
+            // as granted. Confirm with a live, uncached server transaction.
+            return probeLiveGrant();
         } catch (Exception e) {
             return false;
         }
     }
 
-    /** Runs `id` via Shizuku; true only if it executes as shell (uid=2000). */
-    private static boolean probeShell() {
-        Process process = null;
+    /**
+     * Uncached live transaction against the Shizuku server. The server throws
+     * SecurityException for callers it has not authorized; the return value
+     * itself is irrelevant, only that the call went through.
+     */
+    private static boolean probeLiveGrant() {
         try {
-            process = Shizuku.newProcess(new String[]{"id"}, null, null);
-            InputStream in = process.getInputStream();
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            byte[] buf = new byte[512];
-            long deadline = SystemClock.uptimeMillis() + 4000;
-            while (true) {
-                while (in.available() > 0) {
-                    int read = in.read(buf);
-                    if (read == -1) break;
-                    out.write(buf, 0, read);
-                }
-                boolean exited = false;
-                try {
-                    process.exitValue();
-                    exited = true;
-                } catch (IllegalThreadStateException stillRunning) {
-                    // keep waiting
-                }
-                if (exited) {
-                    // Drain anything left, then decide.
-                    while (in.available() > 0) {
-                        int read = in.read(buf);
-                        if (read == -1) break;
-                        out.write(buf, 0, read);
-                    }
-                    break;
-                }
-                if (SystemClock.uptimeMillis() > deadline) return false;
-                try {
-                    Thread.sleep(50);
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    return false;
-                }
-            }
-            String text = out.toString("UTF-8");
-            return text.contains("uid=2000");
-        } catch (Exception e) {
+            Shizuku.checkRemotePermission("android.permission.DUMP");
+            return true;
+        } catch (SecurityException e) {
             return false;
-        } finally {
-            if (process != null) process.destroy();
+        } catch (Exception e) {
+            // Binder died mid-call or other remote error: fail closed, the
+            // next status refresh will re-check.
+            return false;
         }
     }
 
