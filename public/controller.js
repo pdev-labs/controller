@@ -461,6 +461,15 @@ function refreshReceiverSetup() {
             state = authed ? 'authorized' : running ? 'running' : installed ? 'installed' : 'missing';
         }
         if (setupShizukuBtn) setupShizukuBtn.innerText = state === 'authorized' ? 'OK' : 'Setup';
+        const diagEl = document.getElementById('setup-shizuku-diag');
+        if (diagEl) {
+            try {
+                diagEl.innerText = window.AndroidNative.getShizukuDiagnostics
+                    ? window.AndroidNative.getShizukuDiagnostics() : '';
+            } catch (e) {
+                diagEl.innerText = '';
+            }
+        }
     } catch (e) {
         console.log('shizuku status check failed:', e);
     }

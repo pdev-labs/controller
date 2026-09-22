@@ -40,34 +40,44 @@ public final class ShizukuHelper {
     /** True when Shizuku is running AND this app is authorized. */
     public static boolean isAuthorized() {
         try {
-            if (!isBinderAlive()) return false;
-            if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) return false;
-            // checkSelfPermission() caches its result in a static flag that is
-            // never cleared while our process lives (our foreground service
-            // keeps it alive indefinitely), so a revoked grant keeps showing
-            // as granted. Confirm with a live, uncached server transaction.
-            return probeLiveGrant();
+            return isBinderAlive()
+                    && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED;
         } catch (Exception e) {
             return false;
         }
     }
 
     /**
-     * Uncached live transaction against the Shizuku server. The server throws
-     * SecurityException for callers it has not authorized; the return value
-     * itself is irrelevant, only that the call went through.
+     * One-line diagnostics for the setup panel, e.g.
+     * "binder=yes serverUid=2000 serverVer=13 flag=granted".
+     * serverUid 0 means a root backend (auto-grants, nothing to approve in
+     * the Shizuku manager); 2000 means ADB-started Shizuku.
      */
-    private static boolean probeLiveGrant() {
+    public static String getDiagnostics() {
+        boolean binder = isBinderAlive();
+        String uid;
         try {
-            Shizuku.checkRemotePermission("android.permission.DUMP");
-            return true;
-        } catch (SecurityException e) {
-            return false;
+            uid = String.valueOf(Shizuku.getUid());
         } catch (Exception e) {
-            // Binder died mid-call or other remote error: fail closed, the
-            // next status refresh will re-check.
-            return false;
+            uid = "n/a";
         }
+        String ver;
+        try {
+            ver = String.valueOf(Shizuku.getVersion());
+        } catch (Exception e) {
+            ver = "n/a";
+        }
+        String flag;
+        try {
+            flag = Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+                    ? "granted" : "denied";
+        } catch (Exception e) {
+            flag = "n/a";
+        }
+        return "binder=" + (binder ? "yes" : "no")
+                + " serverUid=" + uid
+                + " serverVer=" + ver
+                + " flag=" + flag;
     }
 
     public static boolean isShizukuInstalled(Context ctx) {

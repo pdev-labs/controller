@@ -171,6 +171,11 @@ public class MainActivity extends BridgeActivity {
             }
 
             @JavascriptInterface
+            public String getShizukuDiagnostics() {
+                return ShizukuHelper.getDiagnostics();
+            }
+
+            @JavascriptInterface
             public boolean isShizukuInstalled() {
                 return ShizukuHelper.isShizukuInstalled(MainActivity.this);
             }
