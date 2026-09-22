@@ -109,11 +109,21 @@ public class MainActivity extends BridgeActivity {
             @JavascriptInterface
             public void startServer(String pin) {
                 runOnUiThread(() -> {
-                    requestNotificationPermissionIfNeeded();
-                    Intent intent = new Intent(MainActivity.this, ReceiverService.class);
-                    intent.setAction(ReceiverService.ACTION_START);
-                    intent.putExtra(ReceiverService.EXTRA_PIN, pin);
-                    ContextCompat.startForegroundService(MainActivity.this, intent);
+                    try {
+                        requestNotificationPermissionIfNeeded();
+                        Intent intent = new Intent(MainActivity.this, ReceiverService.class);
+                        intent.setAction(ReceiverService.ACTION_START);
+                        intent.putExtra(ReceiverService.EXTRA_PIN, pin);
+                        ContextCompat.startForegroundService(MainActivity.this, intent);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        if (bridge != null && bridge.getWebView() != null) {
+                            String msg = (e.getMessage() != null ? e.getMessage() : e.toString())
+                                    .replace("\\", "\\\\").replace("'", "\\'");
+                            bridge.getWebView().evaluateJavascript(
+                                "if(window.onReceiverStatus) window.onReceiverStatus('Failed to start: " + msg + "');", null);
+                        }
+                    }
                 });
             }
 

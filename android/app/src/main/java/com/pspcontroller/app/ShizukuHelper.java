@@ -40,8 +40,12 @@ public final class ShizukuHelper {
 
     /** True when Shizuku is running AND this app is authorized. */
     public static boolean isAuthorized() {
-        return isBinderAlive()
-                && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED;
+        try {
+            return isBinderAlive()
+                    && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public static boolean isShizukuInstalled(Context ctx) {

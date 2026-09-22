@@ -106,8 +106,17 @@ public class ReceiverService extends Service {
         }
 
         // Must call startForeground promptly (ANR timeout) after startForegroundService().
-        startForeground(NOTIFICATION_ID, buildNotification(this, "Waiting for controller..."));
-        startReceiver();
+        try {
+            startForeground(NOTIFICATION_ID, buildNotification(this, "Waiting for controller..."));
+            startReceiver();
+        } catch (Exception e) {
+            // Never crash the app from a service start (e.g. FGS restrictions
+            // on some OEM builds) — report and stop instead.
+            e.printStackTrace();
+            lastStatus = "Failed to start receiver: " + e.getMessage();
+            stopSelf();
+            return START_NOT_STICKY;
+        }
         // START_STICKY: if the system kills us under pressure, recreate without
         // the intent and resume listening with the last known PIN.
         return START_STICKY;
@@ -138,8 +147,14 @@ public class ReceiverService extends Service {
             publishStatus(this, lastStatus);
             return;
         }
-        wsServer = new AppWebSocketServer(this, new InetSocketAddress(WS_PORT));
-        wsServer.start();
+        try {
+            AppWebSocketServer server = new AppWebSocketServer(this, new InetSocketAddress(WS_PORT));
+            server.start();
+            wsServer = server;
+        } catch (Exception e) {
+            wsServer = null;
+            throw new RuntimeException("WebSocket server failed to start", e);
+        }
         publishStatus(this, "Server started on port " + WS_PORT + ". Waiting for controller...");
     }
 
