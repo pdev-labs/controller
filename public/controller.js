@@ -354,6 +354,7 @@ if (receiverModeBtn) {
             } else {
                 receiverStatus.innerText = 'Native WebSocket server not available.';
             }
+            if (typeof refreshReceiverSetup === 'function') refreshReceiverSetup();
         } catch (err) {
             receiverStatus.innerText = 'Failed to start Receiver: ' + (err.message || err);
         }
@@ -390,7 +391,117 @@ if (receiverStopBtn) {
     } catch (e) {
         console.log('Receiver restore check failed:', e);
     }
+    refreshReceiverSetup();
 })();
+
+// ---------- Receiver privileged setup (Accessibility + Shizuku) ----------
+const setupA11yStatus = document.getElementById('setup-a11y-status');
+const setupA11yBtn = document.getElementById('setup-a11y-btn');
+const setupShizukuStatus = document.getElementById('setup-shizuku-status');
+const setupShizukuBtn = document.getElementById('setup-shizuku-btn');
+const receiverSetupPanel = document.getElementById('receiver-setup');
+
+function setSetupLabel(el, text, color) {
+    if (!el) return;
+    el.innerText = text;
+    el.style.color = color;
+}
+
+function refreshReceiverSetup() {
+    // Setup panel only exists in the native Android app.
+    if (!window.AndroidNative) {
+        if (receiverSetupPanel) receiverSetupPanel.style.display = 'none';
+        return;
+    }
+    try {
+        const a11yOn = window.AndroidNative.isAccessibilityEnabled
+            ? window.AndroidNative.isAccessibilityEnabled() : false;
+        setSetupLabel(setupA11yStatus, a11yOn ? 'ON' : 'OFF', a11yOn ? '#4CAF50' : '#FF9800');
+        if (setupA11yBtn) setupA11yBtn.innerText = a11yOn ? 'OK' : 'Enable';
+    } catch (e) {
+        console.log('a11y status check failed:', e);
+    }
+    try {
+        const installed = window.AndroidNative.isShizukuInstalled
+            ? window.AndroidNative.isShizukuInstalled() : false;
+        const running = installed && window.AndroidNative.isShizukuRunning
+            ? window.AndroidNative.isShizukuRunning() : false;
+        const authed = running && window.AndroidNative.isShizukuAuthorized
+            ? window.AndroidNative.isShizukuAuthorized() : false;
+        if (authed) setSetupLabel(setupShizukuStatus, 'Authorized', '#4CAF50');
+        else if (running) setSetupLabel(setupShizukuStatus, 'Needs authorization', '#FF9800');
+        else if (installed) setSetupLabel(setupShizukuStatus, 'Not running', '#FF9800');
+        else setSetupLabel(setupShizukuStatus, 'Not installed', '#f44336');
+        if (setupShizukuBtn) setupShizukuBtn.innerText = authed ? 'OK' : 'Setup';
+    } catch (e) {
+        console.log('shizuku status check failed:', e);
+    }
+}
+
+if (setupA11yBtn) {
+    setupA11yBtn.addEventListener('click', () => {
+        try {
+            if (window.AndroidNative.isAccessibilityEnabled
+                && window.AndroidNative.isAccessibilityEnabled()) {
+                refreshReceiverSetup();
+                return;
+            }
+            window.AndroidNative.openAccessibilitySettings();
+            showCustomAlert('Enable "PSP Controller" (Touch Mapper) in Accessibility settings, then return here.');
+        } catch (e) {
+            console.log('openAccessibilitySettings failed:', e);
+        }
+    });
+}
+
+if (setupShizukuBtn) {
+    setupShizukuBtn.addEventListener('click', () => {
+        try {
+            if (window.AndroidNative.isShizukuAuthorized
+                && window.AndroidNative.isShizukuAuthorized()) {
+                refreshReceiverSetup();
+                return;
+            }
+            const installed = window.AndroidNative.isShizukuInstalled
+                ? window.AndroidNative.isShizukuInstalled() : false;
+            if (!installed) {
+                showCustomAlert('Shizuku app is not installed. Install "Shizuku" (moe.shizuku.privileged.api) from GitHub or Play Store, start it, then tap Setup again.');
+                return;
+            }
+            const running = window.AndroidNative.isShizukuRunning
+                ? window.AndroidNative.isShizukuRunning() : false;
+            if (!running) {
+                const opened = window.AndroidNative.openShizukuApp
+                    ? window.AndroidNative.openShizukuApp() : false;
+                showCustomAlert(opened
+                    ? 'Start Shizuku in its app (via Wireless debugging or rooted/adb method), then return here and tap Setup again to authorize.'
+                    : 'Shizuku is installed but not running. Open the Shizuku app and start it, then tap Setup again.');
+                return;
+            }
+            window.AndroidNative.requestShizukuPermission();
+        } catch (e) {
+            console.log('shizuku setup failed:', e);
+        }
+    });
+}
+
+// Shizuku auth result / binder lifecycle callbacks from native code.
+window.onShizukuPermission = (granted) => {
+    if (!granted) {
+        showCustomAlert('Shizuku authorization denied. Approve "PSP Controller" inside the Shizuku app under Authorized apps.');
+    }
+    refreshReceiverSetup();
+};
+window.onShizukuBinder = () => {
+    refreshReceiverSetup();
+};
+
+// Re-check when returning from system settings (accessibility / Shizuku app).
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && receiverUi && receiverUi.style.display !== 'none') {
+        refreshReceiverSetup();
+    }
+});
 // Auto-Detect Logic
 const autoDetectBtn = document.getElementById('auto-detect-btn');
 if (autoDetectBtn) {

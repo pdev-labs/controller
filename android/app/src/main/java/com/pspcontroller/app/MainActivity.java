@@ -13,8 +13,15 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import com.getcapacitor.BridgeActivity;
 
+import rikka.shizuku.Shizuku;
+
 public class MainActivity extends BridgeActivity {
     private static final int NOTIFICATION_PERMISSION_CODE = 9001;
+
+    private final Shizuku.OnBinderReceivedListener binderReceivedListener =
+            () -> pushShizukuBinderEvent(true);
+    private final Shizuku.OnBinderDeadListener binderDeadListener =
+            () -> pushShizukuBinderEvent(false);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -45,6 +52,10 @@ public class MainActivity extends BridgeActivity {
                 }
             })
         );
+
+        // Refresh setup UI when Shizuku starts/stops while the app is open.
+        Shizuku.addBinderReceivedListenerSticky(binderReceivedListener);
+        Shizuku.addBinderDeadListener(binderDeadListener);
 
         this.bridge.getWebView().addJavascriptInterface(new Object() {
             @JavascriptInterface
@@ -130,7 +141,63 @@ public class MainActivity extends BridgeActivity {
             public String getReceiverPin() {
                 return ReceiverService.currentPin;
             }
+
+            // ---------- Privileged setup: Accessibility + Shizuku ----------
+
+            @JavascriptInterface
+            public void openAccessibilitySettings() {
+                runOnUiThread(() -> ShizukuHelper.openAccessibilitySettings(MainActivity.this));
+            }
+
+            @JavascriptInterface
+            public boolean isAccessibilityEnabled() {
+                return ShizukuHelper.isAccessibilityEnabled(MainActivity.this);
+            }
+
+            @JavascriptInterface
+            public boolean isShizukuInstalled() {
+                return ShizukuHelper.isShizukuInstalled(MainActivity.this);
+            }
+
+            @JavascriptInterface
+            public boolean isShizukuRunning() {
+                return ShizukuHelper.isBinderAlive();
+            }
+
+            @JavascriptInterface
+            public boolean isShizukuAuthorized() {
+                return ShizukuHelper.isAuthorized();
+            }
+
+            /** Returns true if the Shizuku manager app was launched. */
+            @JavascriptInterface
+            public boolean openShizukuApp() {
+                return ShizukuHelper.openShizukuApp(MainActivity.this);
+            }
+
+            @JavascriptInterface
+            public void requestShizukuPermission() {
+                ShizukuHelper.requestPermission(granted ->
+                    runOnUiThread(() -> pushShizukuPermissionEvent(granted))
+                );
+            }
         }, "AndroidNative");
+    }
+
+    private void pushShizukuPermissionEvent(boolean granted) {
+        if (bridge != null && bridge.getWebView() != null) {
+            bridge.getWebView().evaluateJavascript(
+                "if(window.onShizukuPermission) window.onShizukuPermission(" + granted + ");", null);
+        }
+    }
+
+    private void pushShizukuBinderEvent(boolean alive) {
+        runOnUiThread(() -> {
+            if (bridge != null && bridge.getWebView() != null) {
+                bridge.getWebView().evaluateJavascript(
+                    "if(window.onShizukuBinder) window.onShizukuBinder(" + alive + ");", null);
+            }
+        });
     }
 
     private void requestNotificationPermissionIfNeeded() {
@@ -148,6 +215,11 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onDestroy() {
         ReceiverService.clearStatusListener();
+        try {
+            Shizuku.removeBinderReceivedListener(binderReceivedListener);
+            Shizuku.removeBinderDeadListener(binderDeadListener);
+        } catch (Exception ignored) {
+        }
         super.onDestroy();
     }
 
