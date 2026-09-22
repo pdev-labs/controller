@@ -5,8 +5,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.SystemClock;
 import android.provider.Settings;
 import android.text.TextUtils;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 
 import rikka.shizuku.Shizuku;
 
@@ -40,10 +44,61 @@ public final class ShizukuHelper {
     /** True when Shizuku is running AND this app is authorized. */
     public static boolean isAuthorized() {
         try {
-            return isBinderAlive()
-                    && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED;
+            if (!isBinderAlive()) return false;
+            if (Shizuku.checkSelfPermission() != PackageManager.PERMISSION_GRANTED) return false;
+            // The flag alone can lie (stale grants, Sui vs Shizuku mix-ups):
+            // prove it by running a trivial privileged command.
+            return probeShell();
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    /** Runs `id` via Shizuku; true only if it executes as shell (uid=2000). */
+    private static boolean probeShell() {
+        Process process = null;
+        try {
+            process = Shizuku.newProcess(new String[]{"id"}, null, null);
+            InputStream in = process.getInputStream();
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte[] buf = new byte[512];
+            long deadline = SystemClock.uptimeMillis() + 4000;
+            while (true) {
+                while (in.available() > 0) {
+                    int read = in.read(buf);
+                    if (read == -1) break;
+                    out.write(buf, 0, read);
+                }
+                boolean exited = false;
+                try {
+                    process.exitValue();
+                    exited = true;
+                } catch (IllegalThreadStateException stillRunning) {
+                    // keep waiting
+                }
+                if (exited) {
+                    // Drain anything left, then decide.
+                    while (in.available() > 0) {
+                        int read = in.read(buf);
+                        if (read == -1) break;
+                        out.write(buf, 0, read);
+                    }
+                    break;
+                }
+                if (SystemClock.uptimeMillis() > deadline) return false;
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    return false;
+                }
+            }
+            String text = out.toString("UTF-8");
+            return text.contains("uid=2000");
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (process != null) process.destroy();
         }
     }
 
