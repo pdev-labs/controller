@@ -248,6 +248,22 @@ if (cancelQrBtn) {
     });
 }
 
+// QR generation (local-first so it works on offline hotspots; the old
+// api.qrserver.com URL is kept as a fallback when the vendored lib fails).
+function makeQrDataUrl(text) {
+    try {
+        if (typeof qrcode !== 'undefined') {
+            const qr = qrcode(0, 'M');
+            qr.addData(text);
+            qr.make();
+            return qr.createDataURL(8, 8);
+        }
+    } catch (e) {
+        console.log('Local QR gen failed, falling back to remote:', e);
+    }
+    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(text)}`;
+}
+
 // Receiver Mode Logic (Android APK Only)
 const receiverModeBtn = document.getElementById('apk-receiver-mode-btn');
 const receiverUi = document.getElementById('receiver-ui');
@@ -347,7 +363,7 @@ if (receiverModeBtn) {
             receiverPinDisplay.innerText = pin;
             
             const wsUrl = `ws://${ip}:3000`;
-            receiverQrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(wsUrl)}`;
+            receiverQrImg.src = makeQrDataUrl(wsUrl);
 
             if (window.AndroidNative && window.AndroidNative.startServer) {
                 window.AndroidNative.startServer(pin);
